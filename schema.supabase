@@ -27,14 +27,26 @@ CREATE TABLE players (
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- 4. Set RLS (Row Level Security) agar Public bisa baca & tulis (untuk kemudahan prototype)
+-- 4. Buat tabel 'questions' untuk bank soal dinamis per room
+CREATE TABLE questions (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  room_id UUID REFERENCES rooms(id) ON DELETE CASCADE,
+  text TEXT NOT NULL,
+  options JSONB NOT NULL,
+  correct_index INTEGER NOT NULL,
+  time_limit INTEGER DEFAULT 30,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- 5. Set RLS (Row Level Security) agar Public bisa baca & tulis (untuk kemudahan prototype)
 ALTER TABLE rooms ENABLE ROW LEVEL SECURITY;
 ALTER TABLE players ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY "Allow public read/write on rooms" ON rooms FOR ALL USING (true) WITH CHECK (true);
 CREATE POLICY "Allow public read/write on players" ON players FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "Allow public read/write on questions" ON questions FOR ALL USING (true) WITH CHECK (true);
 
--- 5. Aktifkan fitur REALTIME untuk sinkronisasi WebSockets
+-- 6. Aktifkan fitur REALTIME untuk sinkronisasi WebSockets
 BEGIN;
   DROP PUBLICATION IF EXISTS supabase_realtime;
   CREATE PUBLICATION supabase_realtime;

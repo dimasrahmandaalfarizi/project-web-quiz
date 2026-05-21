@@ -2,14 +2,15 @@
 
 import { NeoButton } from "@/components/ui/NeoButton";
 import { NeoCard } from "@/components/ui/NeoCard";
+import { NeoInput } from "@/components/ui/NeoInput";
 import { motion, AnimatePresence } from "framer-motion";
 import { useState, useEffect } from "react";
-import { Users, Play, SkipForward, Trophy } from "lucide-react";
+import { Users, Play, SkipForward, Trophy, Plus, Settings } from "lucide-react";
 import { supabase } from "@/lib/supabase";
-import { QUIZ_QUESTIONS } from "@/lib/questions";
 
 type HostState = "LOBBY" | "PLAYING" | "LEADERBOARD" | "FINISHED";
 type PlayerData = { id: string; username: string; score: number; avatar: string };
+type QuestionData = { id?: string; text: string; options: string[]; correct_index: number; time_limit: number };
 
 export default function HostQuizPage() {
   const [hostState, setHostState] = useState<HostState>("LOBBY");
@@ -17,6 +18,13 @@ export default function HostQuizPage() {
   const [currentQuestionIdx, setCurrentQuestionIdx] = useState(0);
   const [roomCode, setRoomCode] = useState<string>("LOADING...");
   const [roomId, setRoomId] = useState<string>("");
+
+  const [questions, setQuestions] = useState<QuestionData[]>([]);
+  const [showAddForm, setShowAddForm] = useState(false);
+  const [newQText, setNewQText] = useState("");
+  const [newQOptions, setNewQOptions] = useState(["", "", "", ""]);
+  const [newQCorrect, setNewQCorrect] = useState(0);
+  const [newQTime, setNewQTime] = useState(30);
 
   useEffect(() => {
     const createRoom = async () => {
@@ -63,8 +71,34 @@ export default function HostQuizPage() {
     createRoom();
   }, []);
 
+  const addQuestion = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newQText || newQOptions.some(opt => !opt.trim())) {
+      alert("Harap isi pertanyaan dan semua opsi!");
+      return;
+    }
+    const { data, error } = await supabase.from('questions').insert([{
+      room_id: roomId,
+      text: newQText,
+      options: newQOptions,
+      correct_index: newQCorrect,
+      time_limit: newQTime
+    }]).select().single();
+
+    if (data && !error) {
+      setQuestions(prev => [...prev, data]);
+      setNewQText("");
+      setNewQOptions(["", "", "", ""]);
+      setNewQCorrect(0);
+      setShowAddForm(false);
+    } else {
+      console.error(error);
+      alert("Gagal menyimpan pertanyaan!");
+    }
+  };
+
   const startGame = async () => {
-    if (!roomId) return;
+    if (!roomId || questions.length === 0) return;
     await supabase.from('rooms').update({ status: 'PLAYING', current_question: 0 }).eq('id', roomId);
     setHostState("PLAYING");
     setCurrentQuestionIdx(0);
@@ -73,7 +107,7 @@ export default function HostQuizPage() {
   const nextQuestion = async () => {
     if (!roomId) return;
     const nextIdx = currentQuestionIdx + 1;
-    if (nextIdx >= QUIZ_QUESTIONS.length) {
+    if (nextIdx >= questions.length) {
       await supabase.from('rooms').update({ status: 'FINISHED' }).eq('id', roomId);
       setHostState("FINISHED");
     } else {
@@ -93,19 +127,19 @@ export default function HostQuizPage() {
     if (data) setPlayers(data);
   };
 
-  const currentQ = QUIZ_QUESTIONS[currentQuestionIdx];
+  const currentQ = questions[currentQuestionIdx];
 
   // Sort players by score for leaderboard view
   const sortedPlayers = [...players].sort((a, b) => b.score - a.score);
 
   return (
     <div className="flex flex-col items-center justify-center min-h-[70vh] py-8">
-      <div className="w-full max-w-5xl">
+      <div className="w-full max-w-5xl px-4">
         {/* Header Admin */}
         <div className="flex justify-between items-center bg-black text-white p-4 rounded-xl border-4 border-black shadow-[4px_4px_0px_#ff5252] mb-8">
           <div className="flex items-center gap-2">
             <span className="bg-[var(--color-neo-primary)] text-white px-2 py-1 rounded font-bold text-sm">HOST</span>
-            <span className="font-black text-xl">Kontrol Panel Kuis</span>
+            <span className="font-black text-xl hidden md:inline">Kontrol Panel Kuis</span>
           </div>
           <div className="flex items-center gap-4 font-bold">
             <div className="flex items-center gap-2">
@@ -123,50 +157,118 @@ export default function HostQuizPage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
-              className="flex flex-col gap-8"
+              className="grid grid-cols-1 md:grid-cols-2 gap-8"
             >
-              <NeoCard className="text-center py-12 border-8 relative overflow-hidden">
-                <div className="absolute top-0 left-0 w-full h-4 bg-[var(--color-neo-green)]"></div>
-                <h1 className="text-4xl md:text-6xl font-black mb-4">Lobby Quiz</h1>
-                <p className="text-xl font-bold text-gray-600 mb-8">Minta peserta untuk join sekarang!</p>
-                
-                <div className="inline-block bg-[var(--color-neo-bg)] px-8 py-4 rounded-2xl border-4 border-black shadow-[4px_4px_0px_#000] mb-8">
-                  <span className="text-sm font-bold text-gray-500 block mb-2">KODE ROOM</span>
-                  <span className="text-5xl font-black tracking-widest">{roomCode}</span>
-                </div>
-
-                <div className="flex justify-center">
-                  <NeoButton 
-                    variant="primary" 
-                    size="lg" 
-                    className="flex items-center gap-2 text-2xl py-4 px-12"
-                    onClick={startGame}
-                    disabled={roomCode === "LOADING..." || roomCode === "ERROR" || players.length === 0}
-                  >
-                    <Play className="w-8 h-8 fill-current" /> MULAI KUIS
-                  </NeoButton>
-                </div>
-              </NeoCard>
-
-              <div>
-                <h3 className="font-black text-2xl mb-4 flex items-center gap-2">
-                  <Users className="w-6 h-6" /> Peserta ({players.length})
-                </h3>
-                {players.length === 0 ? (
-                  <p className="text-gray-500 font-bold italic">Belum ada peserta yang bergabung...</p>
-                ) : (
-                  <div className="flex flex-wrap gap-4">
-                    {players.map((p) => (
-                      <motion.div 
-                        initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ delay: 0.1 }}
-                        key={p.id} 
-                        className="bg-white border-2 border-black rounded-lg px-4 py-2 font-bold shadow-[2px_2px_0px_#000]"
-                      >
-                        <span className="mr-2">{p.avatar || '🦊'}</span>{p.username}
-                      </motion.div>
-                    ))}
+              {/* Left Column: Room Code & Players */}
+              <div className="flex flex-col gap-8">
+                <NeoCard className="text-center py-12 border-8 relative overflow-hidden">
+                  <div className="absolute top-0 left-0 w-full h-4 bg-[var(--color-neo-green)]"></div>
+                  <h1 className="text-4xl font-black mb-4">Lobby Quiz</h1>
+                  <p className="font-bold text-gray-600 mb-6">Minta peserta untuk join sekarang!</p>
+                  
+                  <div className="inline-block bg-[var(--color-neo-bg)] px-8 py-4 rounded-2xl border-4 border-black shadow-[4px_4px_0px_#000] mb-8">
+                    <span className="text-sm font-bold text-gray-500 block mb-2">KODE ROOM</span>
+                    <span className="text-5xl font-black tracking-widest">{roomCode}</span>
                   </div>
-                )}
+
+                  <div className="flex justify-center">
+                    <NeoButton 
+                      variant="primary" 
+                      size="lg" 
+                      className="flex items-center gap-2 text-xl py-4 px-8 w-full justify-center"
+                      onClick={startGame}
+                      disabled={roomCode === "LOADING..." || roomCode === "ERROR" || players.length === 0 || questions.length === 0}
+                    >
+                      <Play className="w-6 h-6 fill-current" /> MULAI KUIS
+                    </NeoButton>
+                  </div>
+                  {questions.length === 0 && (
+                    <p className="text-red-500 font-bold mt-4 text-sm">*Anda belum menambahkan soal</p>
+                  )}
+                </NeoCard>
+
+                <div>
+                  <h3 className="font-black text-2xl mb-4 flex items-center gap-2">
+                    <Users className="w-6 h-6" /> Peserta ({players.length})
+                  </h3>
+                  {players.length === 0 ? (
+                    <p className="text-gray-500 font-bold italic">Belum ada peserta yang bergabung...</p>
+                  ) : (
+                    <div className="flex flex-wrap gap-4">
+                      {players.map((p) => (
+                        <motion.div 
+                          initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ delay: 0.1 }}
+                          key={p.id} 
+                          className="bg-white border-2 border-black rounded-lg px-4 py-2 font-bold shadow-[2px_2px_0px_#000]"
+                        >
+                          <span className="mr-2">{p.avatar || '🦊'}</span>{p.username}
+                        </motion.div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Right Column: Manage Questions */}
+              <div className="flex flex-col gap-4">
+                <h3 className="font-black text-2xl flex items-center gap-2">
+                  <Settings className="w-6 h-6" /> Daftar Soal ({questions.length})
+                </h3>
+                
+                <div className="bg-white border-4 border-black p-4 rounded-xl shadow-[4px_4px_0px_#000] flex flex-col gap-4 max-h-[60vh] overflow-y-auto">
+                  {questions.map((q, i) => (
+                    <div key={q.id || i} className="border-2 border-gray-300 p-4 rounded-lg bg-gray-50">
+                      <p className="font-black mb-2">{i + 1}. {q.text}</p>
+                      <div className="grid grid-cols-2 gap-2 text-sm font-bold">
+                        {q.options.map((opt, oIdx) => (
+                          <div key={oIdx} className={`p-2 rounded border ${q.correct_index === oIdx ? 'bg-[var(--color-neo-green)] border-black' : 'bg-white border-gray-300'}`}>
+                            {['A', 'B', 'C', 'D'][oIdx]}. {opt}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+
+                  {showAddForm ? (
+                    <form onSubmit={addQuestion} className="border-2 border-black p-4 rounded-xl bg-[var(--color-neo-bg)] flex flex-col gap-4">
+                      <div>
+                        <label className="font-bold text-sm">Pertanyaan:</label>
+                        <NeoInput required value={newQText} onChange={e => setNewQText(e.target.value)} placeholder="Masukkan soal..." />
+                      </div>
+                      
+                      <div className="grid grid-cols-1 gap-2">
+                        <label className="font-bold text-sm">Opsi Jawaban:</label>
+                        {newQOptions.map((opt, idx) => (
+                          <div key={idx} className="flex gap-2 items-center">
+                            <span className="font-black">{['A','B','C','D'][idx]}</span>
+                            <NeoInput required value={opt} onChange={e => {
+                              const newOpts = [...newQOptions];
+                              newOpts[idx] = e.target.value;
+                              setNewQOptions(newOpts);
+                            }} placeholder={`Opsi ${['A','B','C','D'][idx]}`} />
+                            <input 
+                              type="radio" 
+                              name="correctAnswer" 
+                              checked={newQCorrect === idx}
+                              onChange={() => setNewQCorrect(idx)}
+                              className="w-5 h-5 accent-black flex-shrink-0 cursor-pointer"
+                            />
+                          </div>
+                        ))}
+                        <p className="text-xs text-gray-600 font-bold italic">*Pilih radio button di kanan untuk kunci jawaban</p>
+                      </div>
+
+                      <div className="flex gap-2 mt-2">
+                        <NeoButton type="button" onClick={() => setShowAddForm(false)} variant="secondary" className="w-1/2">Batal</NeoButton>
+                        <NeoButton type="submit" variant="primary" className="w-1/2">Simpan</NeoButton>
+                      </div>
+                    </form>
+                  ) : (
+                    <NeoButton onClick={() => setShowAddForm(true)} variant="secondary" className="w-full flex items-center justify-center gap-2 border-dashed border-4 border-gray-400 text-gray-600 hover:text-black hover:border-black hover:bg-[var(--color-neo-bg)]">
+                      <Plus className="w-5 h-5" /> Tambah Soal
+                    </NeoButton>
+                  )}
+                </div>
               </div>
             </motion.div>
           )}
@@ -181,7 +283,7 @@ export default function HostQuizPage() {
               className="flex flex-col gap-6"
             >
               <div className="flex justify-between items-end">
-                <h2 className="text-3xl font-black">Pertanyaan {currentQuestionIdx + 1}/{QUIZ_QUESTIONS.length}</h2>
+                <h2 className="text-3xl font-black">Pertanyaan {currentQuestionIdx + 1}/{questions.length}</h2>
                 <NeoButton 
                   variant="secondary" 
                   className="flex items-center gap-2"
@@ -200,7 +302,7 @@ export default function HostQuizPage() {
               <div className="grid grid-cols-2 gap-4">
                 {currentQ.options.map((opt, i) => {
                   const colors = ['bg-[var(--color-neo-primary)]', 'bg-[var(--color-neo-secondary)]', 'bg-[var(--color-neo-accent)]', 'bg-[var(--color-neo-green)]'];
-                  const isCorrect = currentQ.correctIndex === i;
+                  const isCorrect = currentQ.correct_index === i;
                   return (
                     <div key={i} className={`${colors[i]} text-black p-6 rounded-2xl border-4 border-black text-2xl font-black relative ${isCorrect ? 'border-dashed' : ''}`}>
                       <span className="bg-white/30 px-3 py-1 rounded-lg border-2 border-black mr-4 text-xl inline-block mb-2">

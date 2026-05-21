@@ -10,6 +10,7 @@ import { supabase } from "@/lib/supabase";
 import { QUIZ_QUESTIONS } from "@/lib/questions";
 
 type GameState = "JOIN" | "WAITING" | "PLAYING" | "ANSWERED" | "LEADERBOARD" | "FINISHED";
+type QuestionData = { id: string; text: string; options: string[]; correct_index: number; time_limit: number };
 
 export default function QuizPage() {
   const [gameState, setGameState] = useState<GameState>("JOIN");
@@ -27,8 +28,9 @@ export default function QuizPage() {
   const [score, setScore] = useState(0);
   const [streak, setStreak] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
+  const [questions, setQuestions] = useState<QuestionData[]>([]);
   
-  const currentQ = QUIZ_QUESTIONS[currentQIndex];
+  const currentQ = questions[currentQIndex];
 
   // Subscribe to room updates
   useEffect(() => {
@@ -45,7 +47,7 @@ export default function QuizPage() {
               // Pertanyaan baru
               setCurrentQIndex(room.current_question);
               setSelectedAnswer(null);
-              setTimeLeft(QUIZ_QUESTIONS[room.current_question]?.timeLimit || 30);
+              setTimeLeft(questions[room.current_question]?.time_limit || 30);
               setGameState("PLAYING");
             } else if (gameState === "WAITING" || gameState === "LEADERBOARD") {
                // Mulai kuis dari lobby atau lanjut dari leaderboard (meski index sama)
@@ -64,7 +66,7 @@ export default function QuizPage() {
       supabase.removeChannel(channel);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [roomId]);
+  }, [roomId, questions]);
 
   const updatePlayerScore = async (newScore: number, newStreak: number) => {
     if (!playerId) return;
@@ -128,6 +130,13 @@ export default function QuizPage() {
     setRoomId(roomData.id);
     setPlayerId(playerData.id);
     setCurrentQIndex(roomData.current_question);
+    
+    // Fetch questions
+    const { data: qData } = await supabase.from('questions').select('*').eq('room_id', roomData.id).order('created_at', { ascending: true });
+    if (qData) {
+      setQuestions(qData);
+    }
+    
     setGameState("WAITING");
   };
 
@@ -139,7 +148,7 @@ export default function QuizPage() {
     let newScore = score;
     let newStreak = streak;
     
-    const isCorrect = index === currentQ.correctIndex;
+    const isCorrect = index === currentQ.correct_index;
     if (isCorrect) {
       const baseScore = 1000;
       const speedBonus = timeLeft * 10;
@@ -321,7 +330,7 @@ export default function QuizPage() {
           >
             <NeoCard className="flex flex-col items-center gap-8 border-8 p-12">
               <h2 className="text-4xl font-black">
-                {selectedAnswer === currentQ.correctIndex ? "🎉 BENAR!" : selectedAnswer === -1 ? "⏱️ WAKTU HABIS!" : "❌ SALAH!"}
+                {selectedAnswer === currentQ.correct_index ? "🎉 BENAR!" : selectedAnswer === -1 ? "⏱️ WAKTU HABIS!" : "❌ SALAH!"}
               </h2>
               <p className="text-xl font-bold text-gray-600">Menunggu Host melanjutkan kuis...</p>
               
