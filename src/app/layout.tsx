@@ -29,7 +29,7 @@ export default function RootLayout({
       lang="id"
       className={`${outfit.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col font-sans selection:bg-neo-accent selection:text-neo-dark">
+      <body className="min-h-full flex flex-col font-sans selection:bg-neo-accent selection:text-neo-dark overflow-x-hidden">
         <Navbar />
         <main className="flex-1 w-full max-w-7xl mx-auto p-4 md:p-8">
           {children}
