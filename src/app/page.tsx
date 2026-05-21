@@ -59,7 +59,7 @@ export default function Home() {
   ];
 
   return (
-    <div className="flex flex-col gap-24 py-8 overflow-x-hidden w-full">
+    <div className="flex flex-col gap-24 py-8">
       {/* Hero Section */}
       <section className="flex flex-col lg:flex-row items-center gap-12 relative">
         {/* Floating Decorative Elements */}
