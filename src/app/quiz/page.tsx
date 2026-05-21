@@ -5,61 +5,151 @@ import { NeoCard } from "@/components/ui/NeoCard";
 import { NeoInput } from "@/components/ui/NeoInput";
 import { motion, AnimatePresence } from "framer-motion";
 import { useState, useEffect } from "react";
-import { Trophy, Star, Gamepad2 } from "lucide-react";
+import { Trophy, Star, Gamepad2, AlertCircle } from "lucide-react";
+import { supabase } from "@/lib/supabase";
+import { QUIZ_QUESTIONS } from "@/lib/questions";
 
-type GameState = "JOIN" | "WAITING" | "PLAYING" | "PODIUM" | "STATS";
+type GameState = "JOIN" | "WAITING" | "PLAYING" | "ANSWERED" | "LEADERBOARD" | "FINISHED";
 
 export default function QuizPage() {
   const [gameState, setGameState] = useState<GameState>("JOIN");
+  const [roomCode, setRoomCode] = useState("");
   const [username, setUsername] = useState("");
+  const [errorMsg, setErrorMsg] = useState("");
   
-  // Mock Play State
+  const [roomId, setRoomId] = useState<string>("");
+  const [playerId, setPlayerId] = useState<string>("");
+  const [currentQIndex, setCurrentQIndex] = useState(0);
+  
   const [timeLeft, setTimeLeft] = useState(15);
   const [score, setScore] = useState(0);
   const [streak, setStreak] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
+  
+  const currentQ = QUIZ_QUESTIONS[currentQIndex];
 
-  // Auto transition for mockup purposes
+  // Subscribe to room updates
   useEffect(() => {
-    if (gameState === "WAITING") {
-      const t = setTimeout(() => setGameState("PLAYING"), 3000);
-      return () => clearTimeout(t);
-    }
+    if (!roomId) return;
     
-    if (gameState === "PLAYING" && timeLeft > 0) {
+    const channel = supabase.channel(`player-room-${roomId}`)
+      .on(
+        'postgres_changes',
+        { event: 'UPDATE', schema: 'public', table: 'rooms', filter: `id=eq.${roomId}` },
+        (payload) => {
+          const room = payload.new;
+          if (room.status === 'PLAYING') {
+            if (room.current_question !== currentQIndex) {
+              // Pertanyaan baru
+              setCurrentQIndex(room.current_question);
+              setSelectedAnswer(null);
+              setTimeLeft(QUIZ_QUESTIONS[room.current_question]?.timeLimit || 15);
+              setGameState("PLAYING");
+            } else if (gameState === "WAITING" || gameState === "LEADERBOARD") {
+               // Mulai kuis dari lobby atau lanjut dari leaderboard (meski index sama)
+               setGameState("PLAYING");
+            }
+          } else if (room.status === 'LEADERBOARD') {
+            setGameState("LEADERBOARD");
+          } else if (room.status === 'FINISHED') {
+            setGameState("FINISHED");
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [roomId, currentQIndex, gameState]);
+
+  // Local Timer
+  useEffect(() => {
+    if (gameState === "PLAYING" && timeLeft > 0 && selectedAnswer === null) {
       const t = setTimeout(() => setTimeLeft(prev => prev - 1), 1000);
       return () => clearTimeout(t);
-    } else if (gameState === "PLAYING" && timeLeft === 0) {
-      const t = setTimeout(() => setGameState("PODIUM"), 0);
-      return () => clearTimeout(t);
+    } else if (gameState === "PLAYING" && timeLeft === 0 && selectedAnswer === null) {
+      // Waktu habis
+      setSelectedAnswer(-1); // -1 artinya tidak jawab
+      setGameState("ANSWERED");
+      setStreak(0);
+      updatePlayerScore(score, 0);
     }
-  }, [gameState, timeLeft]);
+  }, [gameState, timeLeft, selectedAnswer, score]);
 
-  const handleJoin = (e: React.FormEvent) => {
+  const handleJoin = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (username.trim()) {
-      setGameState("WAITING");
+    setErrorMsg("");
+    if (!username.trim() || !roomCode.trim()) {
+      setErrorMsg("Isi kode room dan nickname!");
+      return;
     }
+
+    // 1. Cek apakah room ada dan statusnya LOBBY
+    const { data: roomData, error: roomError } = await supabase
+      .from('rooms')
+      .select('*')
+      .eq('code', roomCode.toUpperCase())
+      .single();
+
+    if (roomError || !roomData) {
+      setErrorMsg("Room tidak ditemukan!");
+      return;
+    }
+
+    if (roomData.status !== 'LOBBY') {
+      setErrorMsg("Kuis sudah dimulai atau telah selesai!");
+      return;
+    }
+
+    // 2. Join the room
+    const { data: playerData, error: playerError } = await supabase
+      .from('players')
+      .insert([{ room_id: roomData.id, username, score: 0, streak: 0 }])
+      .select()
+      .single();
+
+    if (playerError || !playerData) {
+      setErrorMsg("Gagal bergabung ke room.");
+      return;
+    }
+
+    setRoomId(roomData.id);
+    setPlayerId(playerData.id);
+    setCurrentQIndex(roomData.current_question);
+    setGameState("WAITING");
   };
 
-  const handleAnswer = (index: number) => {
+  const updatePlayerScore = async (newScore: number, newStreak: number) => {
+    if (!playerId) return;
+    await supabase.from('players').update({ score: newScore, streak: newStreak }).eq('id', playerId);
+  };
+
+  const handleAnswer = async (index: number) => {
+    if (selectedAnswer !== null) return;
+    
     setSelectedAnswer(index);
-    // Mock correct answer logic
-    const isCorrect = index === 1; // Always option B for mock
+    
+    let newScore = score;
+    let newStreak = streak;
+    
+    const isCorrect = index === currentQ.correctIndex;
     if (isCorrect) {
       const baseScore = 1000;
       const speedBonus = timeLeft * 10;
       const streakBonus = streak * 100;
-      setScore(prev => prev + baseScore + speedBonus + streakBonus);
-      setStreak(prev => prev + 1);
+      const pointsEarned = baseScore + speedBonus + streakBonus;
+      newScore += pointsEarned;
+      newStreak += 1;
     } else {
-      setStreak(0);
+      newStreak = 0;
     }
+
+    setScore(newScore);
+    setStreak(newStreak);
+    setGameState("ANSWERED");
     
-    // Move to next step in mock
-    setTimeout(() => {
-      setGameState("PODIUM");
-    }, 1500);
+    await updatePlayerScore(newScore, newStreak);
   };
 
   return (
@@ -80,11 +170,25 @@ export default function QuizPage() {
                 <Gamepad2 className="w-12 h-12" />
               </div>
               <h1 className="text-4xl font-black">Join Live Quiz!</h1>
-              <p className="font-bold text-gray-600">Tidak perlu login, cukup masukkan nickname-mu.</p>
+              <p className="font-bold text-gray-600">Masukkan PIN Kuis dari Host.</p>
               
-              <form onSubmit={handleJoin} className="flex flex-col gap-4 mt-4">
+              {errorMsg && (
+                <div className="bg-red-200 border-2 border-red-500 text-red-700 p-3 rounded font-bold flex items-center gap-2">
+                  <AlertCircle className="w-5 h-5" /> {errorMsg}
+                </div>
+              )}
+
+              <form onSubmit={handleJoin} className="flex flex-col gap-4 mt-2">
                 <NeoInput 
-                  placeholder="Masukkan Nickname..." 
+                  placeholder="PIN ROOM (misal: A1B2C)" 
+                  value={roomCode}
+                  onChange={(e) => setRoomCode(e.target.value.toUpperCase())}
+                  className="text-center text-2xl font-black tracking-widest uppercase"
+                  maxLength={6}
+                  required
+                />
+                <NeoInput 
+                  placeholder="Nickname kamu..." 
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
                   className="text-center text-xl"
@@ -112,12 +216,12 @@ export default function QuizPage() {
             <div className="inline-block bg-white px-8 py-4 border-4 border-black shadow-[8px_8px_0px_#1a1a1a] rounded-2xl">
               <span className="text-3xl font-bold">{username}</span>
             </div>
-            <p className="text-xl font-bold text-gray-600">Menunggu host memulai quiz...</p>
+            <p className="text-xl font-bold text-gray-600">Anda berhasil bergabung! Menunggu Host memulai kuis...</p>
           </motion.div>
         )}
 
         {/* 3. PLAYING SCREEN */}
-        {gameState === "PLAYING" && (
+        {gameState === "PLAYING" && currentQ && (
           <motion.div
             key="playing"
             initial={{ opacity: 0 }}
@@ -126,7 +230,7 @@ export default function QuizPage() {
             className="w-full max-w-4xl flex flex-col gap-8"
           >
             {/* Top Bar */}
-            <div className="flex justify-between items-center bg-white p-4 border-4 border-black shadow-[4px_4px_0px_#000] rounded-2xl">
+            <div className="flex justify-between items-center bg-white p-4 border-4 border-black shadow-[4px_4px_0px_#000] rounded-2xl relative">
               <div className="flex items-center gap-2">
                 <div className="bg-[var(--color-neo-accent)] p-2 rounded-lg border-2 border-black">
                   <Star className="w-6 h-6" />
@@ -151,16 +255,14 @@ export default function QuizPage() {
               </div>
             </div>
 
-            {/* Question */}
-            <NeoCard className="text-center py-12 border-8">
-              <h2 className="text-3xl md:text-5xl font-black leading-tight">
-                Apa tujuan utama pembuatan project ini?
-              </h2>
-            </NeoCard>
+            {/* Question (For mobile accessibility) */}
+            <div className="md:hidden bg-white border-4 border-black p-4 rounded-xl font-bold text-center">
+              {currentQ.text}
+            </div>
 
             {/* Options */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {['Mencari Keuntungan', 'Media Pembelajaran Interaktif', 'Bikin Website Biasa', 'Tidak Ada Tujuan'].map((opt, i) => {
+            <div className="grid grid-cols-2 md:grid-cols-2 gap-4 mt-4">
+              {currentQ.options.map((opt, i) => {
                 const colors = ['bg-[var(--color-neo-primary)]', 'bg-[var(--color-neo-secondary)]', 'bg-[var(--color-neo-accent)]', 'bg-[var(--color-neo-green)]'];
                 const isSelected = selectedAnswer === i;
                 
@@ -170,18 +272,20 @@ export default function QuizPage() {
                     whileHover={{ scale: selectedAnswer === null ? 1.02 : 1 }}
                     whileTap={{ scale: selectedAnswer === null ? 0.98 : 1 }}
                     onClick={() => selectedAnswer === null && handleAnswer(i)}
+                    disabled={selectedAnswer !== null}
                     className={`
-                      ${colors[i]} text-black p-6 rounded-2xl border-4 border-black text-2xl font-black text-left
+                      ${colors[i]} text-black p-6 md:p-12 rounded-2xl border-4 border-black text-2xl font-black text-center md:text-left
                       ${selectedAnswer === null ? 'shadow-[4px_4px_0px_#000] cursor-pointer' : ''}
-                      ${isSelected ? 'scale-95 shadow-none' : ''}
+                      ${isSelected ? 'scale-95 shadow-none ring-4 ring-black ring-offset-4' : ''}
                       ${selectedAnswer !== null && !isSelected ? 'opacity-50 grayscale' : ''}
-                      transition-all
+                      transition-all min-h-[150px] flex items-center justify-center md:justify-start
                     `}
                   >
-                    <span className="bg-white/30 px-3 py-1 rounded-lg border-2 border-black mr-4">
+                    {/* Bentuk ikon bisa ditambahkan di sini, untuk sekarang pakai teks opsi */}
+                    <span className="hidden md:inline-block bg-white/30 px-3 py-1 rounded-lg border-2 border-black mr-4">
                       {['A', 'B', 'C', 'D'][i]}
                     </span>
-                    {opt}
+                    <span className="text-xl md:text-2xl">{opt}</span>
                   </motion.button>
                 );
               })}
@@ -189,89 +293,68 @@ export default function QuizPage() {
           </motion.div>
         )}
 
-        {/* 4. PODIUM SCREEN */}
-        {gameState === "PODIUM" && (
+        {/* 4. ANSWERED WAITING SCREEN */}
+        {gameState === "ANSWERED" && (
           <motion.div
-            key="podium"
-            initial={{ opacity: 0, y: 50 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="w-full max-w-4xl text-center space-y-12"
+            key="answered"
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="w-full max-w-2xl text-center"
           >
-            <h2 className="text-5xl font-black">🏆 Hasil Akhir 🏆</h2>
-            
-            <div className="flex justify-center items-end h-64 gap-4 px-4">
-              {/* Rank 2 */}
-              <motion.div 
-                initial={{ height: 0 }} animate={{ height: '60%' }} transition={{ delay: 0.5 }}
-                className="w-1/3 bg-[var(--color-neo-secondary)] border-4 border-black border-b-0 rounded-t-2xl relative flex justify-center"
-              >
-                <div className="absolute -top-16 bg-white px-4 py-2 border-4 border-black shadow-[4px_4px_0px_#000] font-bold rounded-xl whitespace-nowrap">Player 2</div>
-                <span className="text-4xl font-black mt-4">2</span>
-              </motion.div>
+            <NeoCard className="flex flex-col items-center gap-8 border-8 p-12">
+              <h2 className="text-4xl font-black">
+                {selectedAnswer === currentQ.correctIndex ? "🎉 BENAR!" : selectedAnswer === -1 ? "⏱️ WAKTU HABIS!" : "❌ SALAH!"}
+              </h2>
+              <p className="text-xl font-bold text-gray-600">Menunggu Host melanjutkan kuis...</p>
               
-              {/* Rank 1 */}
-              <motion.div 
-                initial={{ height: 0 }} animate={{ height: '100%' }} transition={{ delay: 1 }}
-                className="w-1/3 bg-[var(--color-neo-accent)] border-4 border-black border-b-0 rounded-t-2xl relative flex justify-center"
-              >
-                <div className="absolute -top-20 bg-white px-6 py-3 border-4 border-black shadow-[4px_4px_0px_#000] font-black text-xl rounded-xl whitespace-nowrap">{username}</div>
-                <Trophy className="absolute -top-10 w-12 h-12 text-[var(--color-neo-primary)]" />
-                <span className="text-5xl font-black mt-8">1</span>
-              </motion.div>
-
-              {/* Rank 3 */}
-              <motion.div 
-                initial={{ height: 0 }} animate={{ height: '40%' }} transition={{ delay: 0.2 }}
-                className="w-1/3 bg-[var(--color-neo-green)] border-4 border-black border-b-0 rounded-t-2xl relative flex justify-center"
-              >
-                <div className="absolute -top-16 bg-white px-4 py-2 border-4 border-black shadow-[4px_4px_0px_#000] font-bold rounded-xl whitespace-nowrap">Player 3</div>
-                <span className="text-4xl font-black mt-4">3</span>
-              </motion.div>
-            </div>
-
-            <div className="flex justify-center gap-4 mt-12">
-              <NeoButton onClick={() => setGameState("STATS")} variant="white">
-                Lihat Statistik Saya
-              </NeoButton>
-              <NeoButton onClick={() => window.location.href="/"} variant="primary">
-                Kembali ke Home
-              </NeoButton>
-            </div>
+              <div className="bg-[var(--color-neo-bg)] p-6 rounded-2xl border-4 border-black w-full max-w-sm">
+                <span className="text-gray-500 font-bold block mb-2">Skor Kamu Saat Ini</span>
+                <span className="text-5xl font-black">{score}</span>
+              </div>
+            </NeoCard>
           </motion.div>
         )}
 
-        {/* 5. STATS SCREEN */}
-        {gameState === "STATS" && (
+        {/* 5. LEADERBOARD WAITING SCREEN */}
+        {gameState === "LEADERBOARD" && (
           <motion.div
-            key="stats"
+            key="leaderboard-wait"
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="text-center space-y-8"
+          >
+            <Trophy className="w-24 h-24 text-[var(--color-neo-accent)] mx-auto animate-bounce" />
+            <h2 className="text-5xl font-black">Lihat Papan Skor!</h2>
+            <p className="text-xl font-bold text-gray-600">Cek posisimu di layar Host.</p>
+          </motion.div>
+        )}
+
+        {/* 6. FINISHED / STATS SCREEN */}
+        {gameState === "FINISHED" && (
+          <motion.div
+            key="finished"
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             className="w-full max-w-2xl"
           >
             <NeoCard className="flex flex-col items-center gap-8 border-8 p-12">
-              <h2 className="text-4xl font-black">Statistik Kamu</h2>
+              <h2 className="text-4xl font-black">Kuis Selesai!</h2>
               
               <div className="w-full grid grid-cols-2 gap-4">
                 <div className="bg-[var(--color-neo-bg)] p-6 rounded-2xl border-4 border-black flex flex-col items-center">
-                  <span className="text-gray-500 font-bold mb-2">Total Score</span>
+                  <span className="text-gray-500 font-bold mb-2">Total Skor</span>
                   <span className="text-4xl font-black">{score}</span>
                 </div>
                 <div className="bg-[var(--color-neo-bg)] p-6 rounded-2xl border-4 border-black flex flex-col items-center">
-                  <span className="text-gray-500 font-bold mb-2">Ranking Akhir</span>
-                  <span className="text-4xl font-black">#1</span>
-                </div>
-                <div className="bg-[var(--color-neo-bg)] p-6 rounded-2xl border-4 border-black flex flex-col items-center">
-                  <span className="text-gray-500 font-bold mb-2">Benar</span>
-                  <span className="text-4xl font-black text-[var(--color-neo-green)]">10</span>
-                </div>
-                <div className="bg-[var(--color-neo-bg)] p-6 rounded-2xl border-4 border-black flex flex-col items-center">
-                  <span className="text-gray-500 font-bold mb-2">Salah</span>
-                  <span className="text-4xl font-black text-[var(--color-neo-primary)]">0</span>
+                  <span className="text-gray-500 font-bold mb-2">Streak Tertinggi</span>
+                  <span className="text-4xl font-black">{streak}</span>
                 </div>
               </div>
 
+              <p className="text-xl font-bold text-gray-600">Lihat layar Host untuk mengetahui pemenangnya!</p>
+
               <NeoButton onClick={() => window.location.href="/"} variant="primary" size="lg" className="w-full mt-4">
-                Selesai
+                Kembali ke Beranda
               </NeoButton>
             </NeoCard>
           </motion.div>

@@ -1,0 +1,44 @@
+-- ==========================================
+-- RELIJION QUIZ SUPABASE SCHEMA
+-- Copy-paste semua kode di bawah ini ke SQL Editor Supabase Anda, lalu klik "Run"
+-- ==========================================
+
+-- 1. Hapus tabel lama jika sudah ada (agar bersih)
+DROP TABLE IF EXISTS players CASCADE;
+DROP TABLE IF EXISTS rooms CASCADE;
+
+-- 2. Buat tabel 'rooms' untuk menyimpan status sesi kuis
+CREATE TABLE rooms (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  code TEXT UNIQUE NOT NULL, -- Contoh: 'AGAMA24'
+  status TEXT NOT NULL DEFAULT 'LOBBY', -- Bisa berisi: LOBBY, PLAYING, LEADERBOARD, FINISHED
+  current_question INTEGER DEFAULT 0, -- Menyimpan indeks pertanyaan yang sedang aktif
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- 3. Buat tabel 'players' untuk menyimpan peserta dan skor
+CREATE TABLE players (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  room_id UUID REFERENCES rooms(id) ON DELETE CASCADE,
+  username TEXT NOT NULL,
+  score INTEGER DEFAULT 0,
+  streak INTEGER DEFAULT 0,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- 4. Set RLS (Row Level Security) agar Public bisa baca & tulis (untuk kemudahan prototype)
+ALTER TABLE rooms ENABLE ROW LEVEL SECURITY;
+ALTER TABLE players ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Allow public read/write on rooms" ON rooms FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "Allow public read/write on players" ON players FOR ALL USING (true) WITH CHECK (true);
+
+-- 5. Aktifkan fitur REALTIME untuk sinkronisasi WebSockets
+BEGIN;
+  DROP PUBLICATION IF EXISTS supabase_realtime;
+  CREATE PUBLICATION supabase_realtime;
+COMMIT;
+ALTER PUBLICATION supabase_realtime ADD TABLE rooms;
+ALTER PUBLICATION supabase_realtime ADD TABLE players;
+
+-- Selesai! Tabel siap digunakan.
