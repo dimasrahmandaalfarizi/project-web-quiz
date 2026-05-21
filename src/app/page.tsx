@@ -59,14 +59,14 @@ export default function Home() {
   ];
 
   return (
-    <div className="flex flex-col gap-24 py-8">
+    <div className="flex flex-col gap-24 py-8 overflow-x-hidden w-full">
       {/* Hero Section */}
       <section className="flex flex-col lg:flex-row items-center gap-12 relative">
         {/* Floating Decorative Elements */}
         <motion.div 
           animate={{ rotate: 360 }}
           transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-          className="absolute -top-10 -left-10 w-24 h-24 bg-[var(--color-neo-secondary)] opacity-50 rounded-full border-4 border-black blur-sm -z-10"
+          className="absolute -top-4 -left-4 md:-top-10 md:-left-10 w-16 h-16 md:w-24 md:h-24 bg-[var(--color-neo-secondary)] opacity-50 rounded-full border-4 border-black blur-sm -z-10"
         />
         <motion.div 
           animate={{ y: [0, -20, 0] }}
@@ -80,7 +80,7 @@ export default function Home() {
           transition={{ duration: 0.5 }}
           className="flex-1 space-y-6 relative z-10"
         >
-          <div className="inline-block bg-[var(--color-neo-accent)] text-black font-bold px-4 py-2 rounded-full border-2 border-black shadow-[2px_2px_0px_#000] rotate-[-2deg]">
+          <div className="inline-block bg-[var(--color-neo-accent)] text-black font-bold px-3 py-2 md:px-4 md:py-2 text-sm md:text-base rounded-full border-2 border-black shadow-[2px_2px_0px_#000] rotate-[-2deg]">
             🚀 Platform Belajar Generasi Baru
           </div>
           <h1 className="text-5xl md:text-7xl font-black leading-tight tracking-tight">
@@ -122,16 +122,16 @@ export default function Home() {
             <motion.div 
               animate={{ y: [0, -10, 0] }}
               transition={{ repeat: Infinity, duration: 2 }}
-              className="absolute -top-6 -right-6 z-20 bg-white p-4 border-4 border-black rounded-xl shadow-[4px_4px_0px_#000] rotate-12"
+              className="absolute -top-4 -right-4 md:-top-6 md:-right-6 z-20 bg-white p-3 md:p-4 border-4 border-black rounded-xl shadow-[4px_4px_0px_#000] rotate-12"
             >
-              <span className="text-3xl">✨</span>
+              <span className="text-xl md:text-3xl">✨</span>
             </motion.div>
             <motion.div 
               animate={{ y: [0, 10, 0] }}
               transition={{ repeat: Infinity, duration: 3 }}
-              className="absolute -bottom-6 -left-6 z-20 bg-[var(--color-neo-accent)] px-6 py-3 border-4 border-black rounded-xl shadow-[4px_4px_0px_#000] -rotate-6"
+              className="absolute -bottom-4 -left-4 md:-bottom-6 md:-left-6 z-20 bg-[var(--color-neo-accent)] px-4 py-2 md:px-6 md:py-3 border-4 border-black rounded-xl shadow-[4px_4px_0px_#000] -rotate-6"
             >
-              <span className="text-xl font-black">100% Fun!</span>
+              <span className="text-sm md:text-xl font-black">100% Fun!</span>
             </motion.div>
           </div>
         </motion.div>

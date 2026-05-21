@@ -27,7 +27,7 @@ export default function RootLayout({
   return (
     <html
       lang="id"
-      className={`${outfit.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${outfit.variable} ${geistMono.variable} h-full antialiased overflow-x-hidden`}
     >
       <body className="min-h-full flex flex-col font-sans selection:bg-neo-accent selection:text-neo-dark overflow-x-hidden">
         <Navbar />
