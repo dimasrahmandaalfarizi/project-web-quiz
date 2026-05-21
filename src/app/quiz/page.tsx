@@ -4,7 +4,7 @@ import { NeoButton } from "@/components/ui/NeoButton";
 import { NeoCard } from "@/components/ui/NeoCard";
 import { NeoInput } from "@/components/ui/NeoInput";
 import { motion, AnimatePresence } from "framer-motion";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Trophy, Star, Gamepad2, AlertCircle } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { QUIZ_QUESTIONS } from "@/lib/questions";
@@ -30,6 +30,22 @@ export default function QuizPage() {
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
   const [questions, setQuestions] = useState<QuestionData[]>([]);
   
+  const questionsRef = useRef<QuestionData[]>([]);
+  const gameStateRef = useRef<GameState>("JOIN");
+  const currentQIndexRef = useRef<number>(0);
+
+  useEffect(() => {
+    questionsRef.current = questions;
+  }, [questions]);
+
+  useEffect(() => {
+    gameStateRef.current = gameState;
+  }, [gameState]);
+
+  useEffect(() => {
+    currentQIndexRef.current = currentQIndex;
+  }, [currentQIndex]);
+
   const currentQ = questions[currentQIndex];
 
   // Subscribe to room updates
@@ -42,15 +58,20 @@ export default function QuizPage() {
         { event: 'UPDATE', schema: 'public', table: 'rooms', filter: `id=eq.${roomId}` },
         (payload) => {
           const room = payload.new;
+          const currentQuestions = questionsRef.current;
+          const currentGameState = gameStateRef.current;
+          const currentIdx = currentQIndexRef.current;
+
           if (room.status === 'PLAYING') {
-            if (room.current_question !== currentQIndex) {
+            if (room.current_question !== currentIdx) {
               // Pertanyaan baru
               setCurrentQIndex(room.current_question);
               setSelectedAnswer(null);
-              setTimeLeft(questions[room.current_question]?.time_limit || 30);
+              setTimeLeft(currentQuestions[room.current_question]?.time_limit || 30);
               setGameState("PLAYING");
-            } else if (gameState === "WAITING" || gameState === "LEADERBOARD") {
-               // Mulai kuis dari lobby atau lanjut dari leaderboard (meski index sama)
+            } else if (currentGameState === "WAITING" || currentGameState === "LEADERBOARD") {
+               // Mulai kuis dari lobby atau lanjut dari leaderboard
+               setTimeLeft(currentQuestions[room.current_question]?.time_limit || 30);
                setGameState("PLAYING");
             }
           } else if (room.status === 'LEADERBOARD') {
@@ -66,7 +87,7 @@ export default function QuizPage() {
       supabase.removeChannel(channel);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [roomId, questions]);
+  }, [roomId]);
 
   const updatePlayerScore = async (newScore: number, newStreak: number) => {
     if (!playerId) return;

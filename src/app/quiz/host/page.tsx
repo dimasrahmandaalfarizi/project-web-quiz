@@ -111,7 +111,12 @@ export default function HostQuizPage() {
 
   const startGame = async () => {
     if (!roomId || questions.length === 0) return;
-    await supabase.from('rooms').update({ status: 'PLAYING', current_question: 0 }).eq('id', roomId);
+    const { error } = await supabase.from('rooms').update({ status: 'PLAYING', current_question: 0 }).eq('id', roomId);
+    if (error) {
+      console.error("Start game error:", error);
+      alert("Gagal memulai kuis: " + error.message);
+      return;
+    }
     setHostState("PLAYING");
     setCurrentQuestionIdx(0);
   };
