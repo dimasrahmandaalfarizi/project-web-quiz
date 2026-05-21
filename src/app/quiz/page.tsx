@@ -16,6 +16,8 @@ export default function QuizPage() {
   const [roomCode, setRoomCode] = useState("");
   const [username, setUsername] = useState("");
   const [errorMsg, setErrorMsg] = useState("");
+  const AVATARS = ['🦊', '🐰', '🐶', '🐱', '🐼', '🐯', '🦁', '🐸', '🐵', '🦄', '👽', '🤖'];
+  const [avatar, setAvatar] = useState(AVATARS[0]);
   
   const [roomId, setRoomId] = useState<string>("");
   const [playerId, setPlayerId] = useState<string>("");
@@ -61,7 +63,13 @@ export default function QuizPage() {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [roomId, currentQIndex, gameState]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [roomId]);
+
+  const updatePlayerScore = async (newScore: number, newStreak: number) => {
+    if (!playerId) return;
+    await supabase.from('players').update({ score: newScore, streak: newStreak }).eq('id', playerId);
+  };
 
   // Local Timer
   useEffect(() => {
@@ -70,11 +78,14 @@ export default function QuizPage() {
       return () => clearTimeout(t);
     } else if (gameState === "PLAYING" && timeLeft === 0 && selectedAnswer === null) {
       // Waktu habis
-      setSelectedAnswer(-1); // -1 artinya tidak jawab
-      setGameState("ANSWERED");
-      setStreak(0);
-      updatePlayerScore(score, 0);
+      setTimeout(() => {
+        setSelectedAnswer(-1); // -1 artinya tidak jawab
+        setGameState("ANSWERED");
+        setStreak(0);
+        updatePlayerScore(score, 0);
+      }, 0);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [gameState, timeLeft, selectedAnswer, score]);
 
   const handleJoin = async (e: React.FormEvent) => {
@@ -105,7 +116,7 @@ export default function QuizPage() {
     // 2. Join the room
     const { data: playerData, error: playerError } = await supabase
       .from('players')
-      .insert([{ room_id: roomData.id, username, score: 0, streak: 0 }])
+      .insert([{ room_id: roomData.id, username, avatar, score: 0, streak: 0 }])
       .select()
       .single();
 
@@ -118,11 +129,6 @@ export default function QuizPage() {
     setPlayerId(playerData.id);
     setCurrentQIndex(roomData.current_question);
     setGameState("WAITING");
-  };
-
-  const updatePlayerScore = async (newScore: number, newStreak: number) => {
-    if (!playerId) return;
-    await supabase.from('players').update({ score: newScore, streak: newStreak }).eq('id', playerId);
   };
 
   const handleAnswer = async (index: number) => {
@@ -179,6 +185,18 @@ export default function QuizPage() {
               )}
 
               <form onSubmit={handleJoin} className="flex flex-col gap-4 mt-2">
+                <div className="grid grid-cols-4 md:grid-cols-6 gap-2 mb-2">
+                  {AVATARS.map((a) => (
+                    <button
+                      key={a}
+                      type="button"
+                      onClick={() => setAvatar(a)}
+                      className={`text-3xl p-2 rounded-xl border-2 border-black transition-all flex items-center justify-center ${avatar === a ? 'bg-[var(--color-neo-accent)] scale-110 shadow-[4px_4px_0px_#000] ring-2 ring-black grayscale-0 opacity-100 z-10' : 'bg-white hover:bg-gray-100 grayscale hover:grayscale-0 opacity-50 hover:opacity-100'}`}
+                    >
+                      {a}
+                    </button>
+                  ))}
+                </div>
                 <NeoInput 
                   placeholder="PIN ROOM (misal: A1B2C)" 
                   value={roomCode}

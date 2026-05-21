@@ -9,10 +9,11 @@ import { supabase } from "@/lib/supabase";
 import { QUIZ_QUESTIONS } from "@/lib/questions";
 
 type HostState = "LOBBY" | "PLAYING" | "LEADERBOARD" | "FINISHED";
+type PlayerData = { id: string; username: string; score: number; avatar: string };
 
 export default function HostQuizPage() {
   const [hostState, setHostState] = useState<HostState>("LOBBY");
-  const [players, setPlayers] = useState<any[]>([]);
+  const [players, setPlayers] = useState<PlayerData[]>([]);
   const [currentQuestionIdx, setCurrentQuestionIdx] = useState(0);
   const [roomCode, setRoomCode] = useState<string>("LOADING...");
   const [roomId, setRoomId] = useState<string>("");
@@ -37,7 +38,7 @@ export default function HostQuizPage() {
             'postgres_changes',
             { event: 'INSERT', schema: 'public', table: 'players', filter: `room_id=eq.${data.id}` },
             (payload) => {
-              setPlayers((prev) => [...prev, payload.new]);
+              setPlayers((prev) => [...prev, payload.new as PlayerData]);
             }
           )
           .on(
@@ -45,7 +46,7 @@ export default function HostQuizPage() {
             { event: 'UPDATE', schema: 'public', table: 'players', filter: `room_id=eq.${data.id}` },
             (payload) => {
               // Update score when player answers
-              setPlayers((prev) => prev.map(p => p.id === payload.new.id ? payload.new : p));
+              setPlayers((prev) => prev.map(p => p.id === payload.new.id ? payload.new as PlayerData : p));
             }
           )
           .subscribe();
@@ -155,13 +156,13 @@ export default function HostQuizPage() {
                   <p className="text-gray-500 font-bold italic">Belum ada peserta yang bergabung...</p>
                 ) : (
                   <div className="flex flex-wrap gap-4">
-                    {players.map((p, i) => (
+                    {players.map((p) => (
                       <motion.div 
                         initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ delay: 0.1 }}
                         key={p.id} 
                         className="bg-white border-2 border-black rounded-lg px-4 py-2 font-bold shadow-[2px_2px_0px_#000]"
                       >
-                        {p.username}
+                        <span className="mr-2">{p.avatar || '🦊'}</span>{p.username}
                       </motion.div>
                     ))}
                   </div>
@@ -238,8 +239,8 @@ export default function HostQuizPage() {
                     className="flex items-center justify-between bg-white border-4 border-black rounded-xl p-4 shadow-[4px_4px_0px_#1a1a1a]"
                   >
                     <div className="flex items-center gap-4">
-                      <div className="w-10 h-10 rounded-full border-2 border-black flex items-center justify-center font-black bg-gray-100">
-                        {i + 1}
+                      <div className="w-12 h-12 rounded-full border-4 border-black flex items-center justify-center text-2xl bg-[var(--color-neo-bg)] shadow-[2px_2px_0px_#000]">
+                        {p.avatar || '🦊'}
                       </div>
                       <span className="text-2xl font-black">{p.username}</span>
                     </div>
@@ -277,7 +278,9 @@ export default function HostQuizPage() {
                     initial={{ height: 0 }} animate={{ height: '60%' }} transition={{ delay: 0.5 }}
                     className="w-1/3 bg-[var(--color-neo-secondary)] border-4 border-black border-b-0 rounded-t-2xl relative flex justify-center"
                   >
-                    <div className="absolute -top-16 bg-white px-4 py-2 border-4 border-black shadow-[4px_4px_0px_#000] font-bold rounded-xl whitespace-nowrap">{sortedPlayers[1].username}</div>
+                    <div className="absolute -top-16 bg-white px-4 py-2 border-4 border-black shadow-[4px_4px_0px_#000] font-bold rounded-xl whitespace-nowrap">
+                      <span className="text-2xl mr-2">{sortedPlayers[1].avatar || '🦊'}</span>{sortedPlayers[1].username}
+                    </div>
                     <span className="text-4xl font-black mt-4">2</span>
                   </motion.div>
                 )}
@@ -288,7 +291,10 @@ export default function HostQuizPage() {
                     initial={{ height: 0 }} animate={{ height: '100%' }} transition={{ delay: 1 }}
                     className="w-1/3 bg-[var(--color-neo-accent)] border-4 border-black border-b-0 rounded-t-2xl relative flex justify-center"
                   >
-                    <div className="absolute -top-20 bg-white px-6 py-3 border-4 border-black shadow-[4px_4px_0px_#000] font-black text-xl rounded-xl whitespace-nowrap">{sortedPlayers[0].username}</div>
+                    <div className="absolute -top-24 bg-white px-6 py-3 border-4 border-black shadow-[4px_4px_0px_#000] font-black text-xl rounded-xl whitespace-nowrap flex items-center flex-col">
+                      <span className="text-4xl mb-1">{sortedPlayers[0].avatar || '🦊'}</span>
+                      {sortedPlayers[0].username}
+                    </div>
                     <Trophy className="absolute -top-10 w-12 h-12 text-[var(--color-neo-primary)]" />
                     <span className="text-5xl font-black mt-8">1</span>
                   </motion.div>
@@ -300,7 +306,9 @@ export default function HostQuizPage() {
                     initial={{ height: 0 }} animate={{ height: '40%' }} transition={{ delay: 0.2 }}
                     className="w-1/3 bg-[var(--color-neo-green)] border-4 border-black border-b-0 rounded-t-2xl relative flex justify-center"
                   >
-                    <div className="absolute -top-16 bg-white px-4 py-2 border-4 border-black shadow-[4px_4px_0px_#000] font-bold rounded-xl whitespace-nowrap">{sortedPlayers[2].username}</div>
+                    <div className="absolute -top-16 bg-white px-4 py-2 border-4 border-black shadow-[4px_4px_0px_#000] font-bold rounded-xl whitespace-nowrap">
+                      <span className="text-2xl mr-2">{sortedPlayers[2].avatar || '🦊'}</span>{sortedPlayers[2].username}
+                    </div>
                     <span className="text-4xl font-black mt-4">3</span>
                   </motion.div>
                 )}
