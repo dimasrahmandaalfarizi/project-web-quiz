@@ -1,36 +1,54 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# RELIJION 🚀
 
-## Getting Started
+**Platform Belajar Generasi Baru** yang menggabungkan materi pembelajaran interaktif, portfolio kelompok, dan sistem Kuis *Realtime* yang seru! Didesain khusus untuk anak muda dengan gaya *Neo-Brutalism* yang tebal, asyik, dan 100% *Fun*.
 
-First, run the development server:
+![RELIJION Preview](public/hero.png)
 
+## ✨ Fitur Utama
+- **🎮 Live Realtime Quiz**: Sistem kuis multiplayer *realtime* berbasis Supabase.
+  - **Host Panel**: Manajemen soal kuis (Global Question Bank), pengawasan *Live Leaderboard*, dan kontrol jalannya kuis.
+  - **Self-Paced Mode**: Pemain mengerjakan soal secara mandiri di perangkat masing-masing layaknya *Quizizz*.
+- **📚 Materi Interaktif**: Modul pembelajaran yang rapi dan mudah dibaca.
+- **🖼️ Gallery Portfolio**: Tempat memamerkan hasil karya dan tugas kelompok.
+- **🎨 Neo-Brutalism UI**: Antarmuka modern dengan animasi dinamis menggunakan *Framer Motion*.
+
+## 🛠️ Tech Stack
+- **Framework**: [Next.js (App Router)](https://nextjs.org/)
+- **Language**: [TypeScript](https://www.typescriptlang.org/)
+- **Styling**: [Tailwind CSS](https://tailwindcss.com/)
+- **Animations**: [Framer Motion](https://www.framer.com/motion/)
+- **Backend & Database**: [Supabase (PostgreSQL & Realtime)](https://supabase.com/)
+- **Deployment**: [Vercel](https://vercel.com/)
+
+## 🚀 Cara Menjalankan (Local Development)
+
+1. Clone repositori ini:
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+git clone https://github.com/dimasrahmandaalfarizi/project-web-quiz.git
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+2. Install dependencies:
+```bash
+npm install
+```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+3. Siapkan *Environment Variables*:
+Buat file `.env.local` di folder utama dan masukkan kredensial Supabase Anda:
+```env
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+4. Jalankan server lokal:
+```bash
+npm run dev
+```
 
-## Learn More
+Buka [http://localhost:3000](http://localhost:3000) di browser Anda untuk melihat hasilnya.
 
-To learn more about Next.js, take a look at the following resources:
+## 📦 Setup Database (Supabase)
+Aplikasi ini memerlukan 3 tabel utama di Supabase: `questions`, `rooms`, dan `players`. 
+Anda dapat menemukan *query* lengkap untuk membuat dan mengatur tabel-tabel ini (termasuk *Row Level Security* dan *Realtime Publication*) di dalam file `schema.supabase`.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+---
+*Belajar Agama Jadi Lebih Seru!* 🦊
