@@ -5,7 +5,7 @@ import { NeoCard } from "@/components/ui/NeoCard";
 import { NeoInput } from "@/components/ui/NeoInput";
 import { motion, AnimatePresence } from "framer-motion";
 import { useState, useEffect } from "react";
-import { Users, Play, SkipForward, Trophy, Plus, Settings } from "lucide-react";
+import { Users, Play, SkipForward, Trophy, Plus, Settings, Trash } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 
 type HostState = "LOBBY" | "PLAYING" | "LEADERBOARD" | "FINISHED";
@@ -27,6 +27,12 @@ export default function HostQuizPage() {
   const [newQTime, setNewQTime] = useState(30);
 
   useEffect(() => {
+    const fetchQuestions = async () => {
+      const { data } = await supabase.from('questions').select('*').order('created_at', { ascending: true });
+      if (data) setQuestions(data);
+    };
+    fetchQuestions();
+
     const createRoom = async () => {
       // Generate random 5-letter code
       const code = Math.random().toString(36).substring(2, 7).toUpperCase();
@@ -78,7 +84,6 @@ export default function HostQuizPage() {
       return;
     }
     const { data, error } = await supabase.from('questions').insert([{
-      room_id: roomId,
       text: newQText,
       options: newQOptions,
       correct_index: newQCorrect,
@@ -95,6 +100,13 @@ export default function HostQuizPage() {
       console.error(error);
       alert("Gagal menyimpan pertanyaan: " + error?.message);
     }
+  };
+
+  const deleteQuestion = async (id?: string) => {
+    if (!id) return;
+    if (!confirm("Hapus soal ini?")) return;
+    await supabase.from('questions').delete().eq('id', id);
+    setQuestions(prev => prev.filter(q => q.id !== id));
   };
 
   const startGame = async () => {
@@ -217,7 +229,13 @@ export default function HostQuizPage() {
                 
                 <div className="bg-white border-4 border-black p-4 rounded-xl shadow-[4px_4px_0px_#000] flex flex-col gap-4 max-h-[60vh] overflow-y-auto">
                   {questions.map((q, i) => (
-                    <div key={q.id || i} className="border-2 border-gray-300 p-4 rounded-lg bg-gray-50">
+                    <div key={q.id || i} className="border-2 border-gray-300 p-4 rounded-lg bg-gray-50 relative pr-10">
+                      <button 
+                        onClick={() => deleteQuestion(q.id)}
+                        className="absolute top-2 right-2 text-red-500 hover:text-red-700 bg-white border-2 border-black p-1 rounded shadow-[2px_2px_0px_#000]"
+                      >
+                        <Trash className="w-4 h-4" />
+                      </button>
                       <p className="font-black mb-2">{i + 1}. {q.text}</p>
                       <div className="grid grid-cols-2 gap-2 text-sm font-bold">
                         {q.options.map((opt, oIdx) => (

@@ -27,10 +27,9 @@ CREATE TABLE players (
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- 4. Buat tabel 'questions' untuk bank soal dinamis per room
+-- 4. Buat tabel 'questions' untuk bank soal dinamis global
 CREATE TABLE questions (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  room_id UUID REFERENCES rooms(id) ON DELETE CASCADE,
   text TEXT NOT NULL,
   options JSONB NOT NULL,
   correct_index INTEGER NOT NULL,

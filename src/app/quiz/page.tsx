@@ -131,8 +131,8 @@ export default function QuizPage() {
     setPlayerId(playerData.id);
     setCurrentQIndex(roomData.current_question);
     
-    // Fetch questions
-    const { data: qData } = await supabase.from('questions').select('*').eq('room_id', roomData.id).order('created_at', { ascending: true });
+    // Fetch global questions
+    const { data: qData } = await supabase.from('questions').select('*').order('created_at', { ascending: true });
     if (qData) {
       setQuestions(qData);
     }
