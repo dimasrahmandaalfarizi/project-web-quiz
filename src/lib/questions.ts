@@ -9,7 +9,7 @@ export const QUIZ_QUESTIONS = [
       "Tidak Ada Tujuan"
     ],
     correctIndex: 1, // B
-    timeLimit: 15
+    timeLimit: 30
   },
   {
     id: 2,
@@ -21,7 +21,7 @@ export const QUIZ_QUESTIONS = [
       "Membaca Al-Qur'an setiap hari"
     ],
     correctIndex: 3, // D
-    timeLimit: 15
+    timeLimit: 30
   },
   {
     id: 3,
@@ -33,6 +33,6 @@ export const QUIZ_QUESTIONS = [
       "Malaikat Izrail"
     ],
     correctIndex: 0, // A
-    timeLimit: 15
+    timeLimit: 30
   }
 ];

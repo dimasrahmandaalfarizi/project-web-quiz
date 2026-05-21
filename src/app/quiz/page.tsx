@@ -23,7 +23,7 @@ export default function QuizPage() {
   const [playerId, setPlayerId] = useState<string>("");
   const [currentQIndex, setCurrentQIndex] = useState(0);
   
-  const [timeLeft, setTimeLeft] = useState(15);
+  const [timeLeft, setTimeLeft] = useState(30);
   const [score, setScore] = useState(0);
   const [streak, setStreak] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
@@ -45,7 +45,7 @@ export default function QuizPage() {
               // Pertanyaan baru
               setCurrentQIndex(room.current_question);
               setSelectedAnswer(null);
-              setTimeLeft(QUIZ_QUESTIONS[room.current_question]?.timeLimit || 15);
+              setTimeLeft(QUIZ_QUESTIONS[room.current_question]?.timeLimit || 30);
               setGameState("PLAYING");
             } else if (gameState === "WAITING" || gameState === "LEADERBOARD") {
                // Mulai kuis dari lobby atau lanjut dari leaderboard (meski index sama)
