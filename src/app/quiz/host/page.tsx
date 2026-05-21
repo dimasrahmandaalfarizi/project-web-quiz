@@ -11,7 +11,7 @@ type HostState = "LOBBY" | "PLAYING" | "LEADERBOARD";
 export default function HostQuizPage() {
   const [hostState, setHostState] = useState<HostState>("LOBBY");
   const [players] = useState(["Budi", "Siti", "Agus", "Dina", "Eko"]);
-  const [currentQuestion, setCurrentQuestion] = useState(1);
+  const [currentQuestion] = useState(1);
 
   return (
     <div className="flex flex-col items-center justify-center min-h-[70vh] py-8">

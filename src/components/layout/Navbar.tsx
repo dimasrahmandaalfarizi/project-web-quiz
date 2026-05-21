@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { NeoButton } from "../ui/NeoButton";
-import { BookOpen, Menu, X } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
@@ -35,11 +35,8 @@ export function Navbar() {
       )}
     >
       <div className="max-w-7xl mx-auto flex items-center justify-between">
-        <Link href="/" className="flex items-center gap-2 group">
-          <div className="bg-[var(--color-neo-accent)] p-2 rounded-lg border-2 border-[var(--color-neo-dark)] group-hover:-translate-y-1 transition-transform shadow-[2px_2px_0px_#1a1a1a]">
-            <BookOpen className="w-6 h-6" />
-          </div>
-          <span className="text-2xl font-black tracking-tight">NeoLearn</span>
+        <Link href="/" className="flex items-center group">
+          <span className="text-3xl font-black tracking-tight group-hover:-translate-y-1 transition-transform">RELIJION</span>
         </Link>
         
         {/* Desktop Menu */}

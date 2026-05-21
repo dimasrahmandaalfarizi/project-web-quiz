@@ -5,7 +5,7 @@ import { NeoCard } from "@/components/ui/NeoCard";
 import { NeoInput } from "@/components/ui/NeoInput";
 import { motion, AnimatePresence } from "framer-motion";
 import { useState, useEffect } from "react";
-import { Trophy, Clock, Zap, Star, Gamepad2 } from "lucide-react";
+import { Trophy, Star, Gamepad2 } from "lucide-react";
 
 type GameState = "JOIN" | "WAITING" | "PLAYING" | "PODIUM" | "STATS";
 
@@ -30,7 +30,8 @@ export default function QuizPage() {
       const t = setTimeout(() => setTimeLeft(prev => prev - 1), 1000);
       return () => clearTimeout(t);
     } else if (gameState === "PLAYING" && timeLeft === 0) {
-      setGameState("PODIUM");
+      const t = setTimeout(() => setGameState("PODIUM"), 0);
+      return () => clearTimeout(t);
     }
   }, [gameState, timeLeft]);
 

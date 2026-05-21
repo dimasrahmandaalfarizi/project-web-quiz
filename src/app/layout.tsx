@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "NeoLearn | Interactive Learning & Quiz",
+  title: "RELIJION | Interactive Learning & Quiz",
   description: "Platform pembelajaran interaktif dan quiz realtime",
 };
 

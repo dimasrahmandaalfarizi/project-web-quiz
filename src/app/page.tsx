@@ -119,12 +119,12 @@ export default function Home() {
         >
           <div className="relative">
             <div className="absolute inset-0 bg-[var(--color-neo-green)] translate-x-4 translate-y-4 rounded-3xl border-4 border-black" />
-            <div className="relative z-10 w-full bg-white flex items-center justify-center rounded-3xl border-4 border-black aspect-[4/3]">
-              <div className="text-center">
-                <BookOpen className="w-24 h-24 md:w-32 md:h-32 mx-auto text-[var(--color-neo-primary)] opacity-50" />
-                <p className="mt-4 font-black text-xl md:text-2xl text-gray-400">GAMBAR ILUSTRASI</p>
-              </div>
-            </div>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img 
+              src="/hero.png" 
+              alt="Students Learning" 
+              className="relative z-10 w-full object-cover rounded-3xl border-4 border-black aspect-[4/3]"
+            />
             {/* Floating Badges */}
             <motion.div 
               animate={{ y: [0, -10, 0] }}
@@ -185,8 +185,8 @@ export default function Home() {
       </section>
 
       {/* Features Section */}
-      <section className="py-12 bg-white -mx-4 md:-mx-8 px-4 md:px-8 border-y-4 border-black shadow-[0px_8px_0px_#000]">
-        <div className="max-w-7xl mx-auto py-8">
+      <section className="py-12 bg-white rounded-3xl border-4 border-black shadow-[8px_8px_0px_#000] px-4 md:px-8 my-12">
+        <div className="py-8">
           <div className="text-center mb-12">
             <h2 className="text-4xl font-black mb-4">Fitur Unggulan</h2>
             <p className="text-lg font-medium text-gray-700">Semua yang kamu butuhkan ada di sini.</p>
