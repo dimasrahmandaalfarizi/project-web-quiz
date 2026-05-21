@@ -118,33 +118,14 @@ export default function HostQuizPage() {
       return;
     }
     setHostState("PLAYING");
-    setCurrentQuestionIdx(0);
   };
 
-  const nextQuestion = async () => {
+  const endQuiz = async () => {
     if (!roomId) return;
-    const nextIdx = currentQuestionIdx + 1;
-    if (nextIdx >= questions.length) {
-      await supabase.from('rooms').update({ status: 'FINISHED' }).eq('id', roomId);
-      setHostState("FINISHED");
-    } else {
-      await supabase.from('rooms').update({ status: 'PLAYING', current_question: nextIdx }).eq('id', roomId);
-      setHostState("PLAYING");
-      setCurrentQuestionIdx(nextIdx);
-    }
+    if (!confirm("Akhiri kuis sekarang?")) return;
+    await supabase.from('rooms').update({ status: 'FINISHED' }).eq('id', roomId);
+    setHostState("FINISHED");
   };
-
-  const showLeaderboard = async () => {
-    if (!roomId) return;
-    await supabase.from('rooms').update({ status: 'LEADERBOARD' }).eq('id', roomId);
-    setHostState("LEADERBOARD");
-    
-    // Refresh players data to get latest scores sorted
-    const { data } = await supabase.from('players').select('*').eq('room_id', roomId).order('score', { ascending: false });
-    if (data) setPlayers(data);
-  };
-
-  const currentQ = questions[currentQuestionIdx];
 
   // Sort players by score for leaderboard view
   const sortedPlayers = [...players].sort((a, b) => b.score - a.score);
@@ -296,92 +277,58 @@ export default function HostQuizPage() {
             </motion.div>
           )}
 
-          {/* 2. PLAYING SCREEN */}
-          {hostState === "PLAYING" && currentQ && (
+          {/* 2. PLAYING / LIVE LEADERBOARD SCREEN */}
+          {hostState === "PLAYING" && (
             <motion.div
               key="playing"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="flex flex-col gap-6"
-            >
-              <div className="flex justify-between items-end">
-                <h2 className="text-3xl font-black">Pertanyaan {currentQuestionIdx + 1}/{questions.length}</h2>
-                <NeoButton 
-                  variant="secondary" 
-                  className="flex items-center gap-2"
-                  onClick={showLeaderboard}
-                >
-                  <SkipForward className="w-5 h-5" /> Ke Leaderboard
-                </NeoButton>
-              </div>
-
-              <NeoCard className="text-center py-16 border-8 bg-[var(--color-neo-bg)]">
-                <h2 className="text-4xl md:text-5xl font-black leading-tight max-w-3xl mx-auto">
-                  {currentQ.text}
-                </h2>
-              </NeoCard>
-
-              <div className="grid grid-cols-2 gap-4">
-                {currentQ.options.map((opt, i) => {
-                  const colors = ['bg-[var(--color-neo-primary)]', 'bg-[var(--color-neo-secondary)]', 'bg-[var(--color-neo-accent)]', 'bg-[var(--color-neo-green)]'];
-                  const isCorrect = currentQ.correct_index === i;
-                  return (
-                    <div key={i} className={`${colors[i]} text-black p-6 rounded-2xl border-4 border-black text-2xl font-black relative ${isCorrect ? 'border-dashed' : ''}`}>
-                      <span className="bg-white/30 px-3 py-1 rounded-lg border-2 border-black mr-4 text-xl inline-block mb-2">
-                        {['A', 'B', 'C', 'D'][i]}
-                      </span>
-                      <br/>
-                      {opt}
-                      {isCorrect && <span className="absolute top-2 right-2 text-sm bg-white px-2 py-1 border-2 border-black rounded shadow-[2px_2px_0px_#000]">Jawaban Benar</span>}
-                    </div>
-                  );
-                })}
-              </div>
-            </motion.div>
-          )}
-
-          {/* 3. LEADERBOARD SCREEN */}
-          {hostState === "LEADERBOARD" && (
-            <motion.div
-              key="leaderboard"
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               className="flex flex-col gap-6 items-center"
             >
+              <div className="w-full flex justify-between items-center mb-4">
+                <h2 className="text-3xl font-black flex items-center gap-2">
+                  <Play className="w-8 h-8 text-[var(--color-neo-primary)]" /> Kuis Berlangsung...
+                </h2>
+                <NeoButton 
+                  variant="secondary" 
+                  className="flex items-center gap-2 border-red-500 text-red-500 hover:bg-red-500 hover:text-white"
+                  onClick={endQuiz}
+                >
+                  Akhiri Kuis
+                </NeoButton>
+              </div>
+
               <h2 className="text-5xl font-black mb-8 flex items-center gap-4">
                 <Trophy className="w-12 h-12 text-[var(--color-neo-accent)]" /> 
-                Current Standings
+                Live Leaderboard
               </h2>
 
               <div className="w-full max-w-3xl flex flex-col gap-4">
-                {sortedPlayers.map((p, i) => (
-                  <motion.div 
-                    initial={{ x: -50, opacity: 0 }} 
-                    animate={{ x: 0, opacity: 1 }} 
-                    transition={{ delay: i * 0.1 }}
-                    key={p.id} 
-                    className="flex items-center justify-between bg-white border-4 border-black rounded-xl p-4 shadow-[4px_4px_0px_#1a1a1a]"
-                  >
-                    <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 rounded-full border-4 border-black flex items-center justify-center text-2xl bg-[var(--color-neo-bg)] shadow-[2px_2px_0px_#000]">
-                        {p.avatar || '🦊'}
+                <AnimatePresence>
+                  {sortedPlayers.map((p, i) => (
+                    <motion.div 
+                      layout
+                      initial={{ x: -50, opacity: 0 }} 
+                      animate={{ x: 0, opacity: 1 }} 
+                      exit={{ opacity: 0, scale: 0.5 }}
+                      transition={{ duration: 0.3 }}
+                      key={p.id} 
+                      className="flex items-center justify-between bg-white border-4 border-black rounded-xl p-4 shadow-[4px_4px_0px_#1a1a1a]"
+                    >
+                      <div className="flex items-center gap-4">
+                        <div className="w-12 h-12 rounded-full border-4 border-black flex items-center justify-center text-2xl bg-[var(--color-neo-bg)] shadow-[2px_2px_0px_#000]">
+                          {p.avatar || '🦊'}
+                        </div>
+                        <span className="text-2xl font-black">{p.username}</span>
                       </div>
-                      <span className="text-2xl font-black">{p.username}</span>
-                    </div>
-                    <span className="text-2xl font-black">{p.score} pts</span>
-                  </motion.div>
-                ))}
+                      <span className="text-2xl font-black">{p.score} pts</span>
+                    </motion.div>
+                  ))}
+                </AnimatePresence>
                 
                 {sortedPlayers.length === 0 && (
                   <p className="text-center font-bold text-gray-500">Belum ada skor yang tercatat.</p>
                 )}
-              </div>
-
-              <div className="flex gap-4 mt-8">
-                <NeoButton variant="primary" size="lg" onClick={nextQuestion}>
-                  Pertanyaan Selanjutnya
-                </NeoButton>
               </div>
             </motion.div>
           )}

@@ -63,19 +63,13 @@ export default function QuizPage() {
           const currentIdx = currentQIndexRef.current;
 
           if (room.status === 'PLAYING') {
-            if (room.current_question !== currentIdx) {
-              // Pertanyaan baru
-              setCurrentQIndex(room.current_question);
-              setSelectedAnswer(null);
-              setTimeLeft(currentQuestions[room.current_question]?.time_limit || 30);
-              setGameState("PLAYING");
-            } else if (currentGameState === "WAITING" || currentGameState === "LEADERBOARD") {
-               // Mulai kuis dari lobby atau lanjut dari leaderboard
-               setTimeLeft(currentQuestions[room.current_question]?.time_limit || 30);
+            if (currentGameState === "WAITING") {
+               // Mulai kuis dari lobby
+               setCurrentQIndex(0);
+               setSelectedAnswer(null);
+               setTimeLeft(currentQuestions[0]?.time_limit || 30);
                setGameState("PLAYING");
             }
-          } else if (room.status === 'LEADERBOARD') {
-            setGameState("LEADERBOARD");
           } else if (room.status === 'FINISHED') {
             setGameState("FINISHED");
           }
@@ -110,6 +104,24 @@ export default function QuizPage() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [gameState, timeLeft, selectedAnswer, score]);
+
+  // Auto-advance logic
+  useEffect(() => {
+    if (gameState === "ANSWERED") {
+      const t = setTimeout(() => {
+        const nextIdx = currentQIndexRef.current + 1;
+        if (nextIdx >= questionsRef.current.length) {
+          setGameState("FINISHED");
+        } else {
+          setCurrentQIndex(nextIdx);
+          setSelectedAnswer(null);
+          setTimeLeft(questionsRef.current[nextIdx]?.time_limit || 30);
+          setGameState("PLAYING");
+        }
+      }, 3000); // Tunggu 3 detik untuk melihat jawaban benar/salah
+      return () => clearTimeout(t);
+    }
+  }, [gameState]);
 
   const handleJoin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -353,7 +365,7 @@ export default function QuizPage() {
               <h2 className="text-4xl font-black">
                 {selectedAnswer === currentQ.correct_index ? "🎉 BENAR!" : selectedAnswer === -1 ? "⏱️ WAKTU HABIS!" : "❌ SALAH!"}
               </h2>
-              <p className="text-xl font-bold text-gray-600">Menunggu Host melanjutkan kuis...</p>
+              <p className="text-xl font-bold text-gray-600">Menyiapkan pertanyaan selanjutnya...</p>
               
               <div className="bg-[var(--color-neo-bg)] p-6 rounded-2xl border-4 border-black w-full max-w-sm">
                 <span className="text-gray-500 font-bold block mb-2">Skor Kamu Saat Ini</span>
