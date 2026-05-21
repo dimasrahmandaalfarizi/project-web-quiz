@@ -93,7 +93,7 @@ export default function HostQuizPage() {
       setShowAddForm(false);
     } else {
       console.error(error);
-      alert("Gagal menyimpan pertanyaan!");
+      alert("Gagal menyimpan pertanyaan: " + error?.message);
     }
   };
 

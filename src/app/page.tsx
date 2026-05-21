@@ -28,13 +28,6 @@ export default function Home() {
       icon: <Gamepad2 className="w-8 h-8" />,
       color: "var(--color-neo-accent)",
       link: "/quiz"
-    },
-    {
-      title: "Multi Kelompok",
-      desc: "Platform terpadu untuk 4 kelompok agama yang berbeda.",
-      icon: <Users className="w-8 h-8" />,
-      color: "var(--color-neo-green)",
-      link: "/materi"
     }
   ];
 
@@ -192,7 +185,7 @@ export default function Home() {
             <p className="text-lg font-medium text-gray-700">Semua yang kamu butuhkan ada di sini.</p>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-3 gap-6">
             {features.map((feature, idx) => (
               <motion.div
                 key={idx}
