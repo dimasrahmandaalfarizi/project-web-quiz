@@ -111,7 +111,7 @@ export default function GalleryPage() {
           variant={filter === "all" ? "secondary" : "white"} 
           onClick={() => handleFilterChange("all")}
         >
-          Semua Kelompok
+          SEMUA KELOMPOK
         </NeoButton>
         <NeoButton 
           variant={filter === "religion" ? "secondary" : "white"} 
@@ -125,7 +125,7 @@ export default function GalleryPage() {
             variant={filter === group ? "secondary" : "white"}
             onClick={() => handleFilterChange(group)}
           >
-            Kelompok {group}
+            KELOMPOK {group}
           </NeoButton>
         ))}
       </div>

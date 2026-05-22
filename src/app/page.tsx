@@ -100,11 +100,7 @@ export default function Home() {
       {/* Hero Section */}
       <section className="flex flex-col lg:flex-row items-center gap-12 relative">
         {/* Floating Decorative Elements */}
-        <motion.div 
-          animate={{ rotate: 360 }}
-          transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-          className="absolute -top-4 -left-4 md:-top-10 md:-left-10 w-16 h-16 md:w-24 md:h-24 bg-[var(--color-neo-secondary)] opacity-50 rounded-full border-4 border-black blur-sm -z-10"
-        />
+        {/* Floating Decorative Elements Removed */}
         <motion.div 
           animate={{ y: [0, -20, 0] }}
           transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
@@ -252,10 +248,7 @@ export default function Home() {
           viewport={{ once: true }}
           className="bg-[var(--color-neo-dark)] rounded-3xl p-8 md:p-16 border-4 border-black shadow-[8px_8px_0px_#ff5252] text-center relative overflow-hidden"
         >
-          {/* CTA Background Deco */}
-          <div className="absolute top-0 right-0 w-64 h-64 bg-[var(--color-neo-primary)] opacity-20 rounded-full blur-3xl"></div>
-          <div className="absolute bottom-0 left-0 w-64 h-64 bg-[var(--color-neo-secondary)] opacity-20 rounded-full blur-3xl"></div>
-          
+          {/* CTA Background Deco Removed */}          
           <div className="relative z-10 max-w-3xl mx-auto space-y-8">
             <h2 className="text-4xl md:text-6xl font-black text-white leading-tight">
               Siap Untuk Menjadi <span className="text-[var(--color-neo-accent)]">Juara?</span>
