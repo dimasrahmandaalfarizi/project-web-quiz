@@ -24,7 +24,6 @@ export function Footer() {
           <div className="flex flex-col gap-4">
             <h3 className="text-2xl font-black mb-2">Navigasi Utama</h3>
             <Link href="/" className="font-bold text-lg hover:text-[var(--color-neo-primary)] hover:translate-x-2 transition-transform w-fit">Beranda</Link>
-            <Link href="/materi" className="font-bold text-lg hover:text-[var(--color-neo-primary)] hover:translate-x-2 transition-transform w-fit">Materi Belajar</Link>
             <Link href="/gallery" className="font-bold text-lg hover:text-[var(--color-neo-primary)] hover:translate-x-2 transition-transform w-fit">Gallery Kegiatan</Link>
             <Link href="/quiz" className="font-bold text-lg hover:text-[var(--color-neo-primary)] hover:translate-x-2 transition-transform w-fit">Live Quiz</Link>
           </div>

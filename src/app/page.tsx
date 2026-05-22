@@ -19,13 +19,7 @@ export default function Home() {
   }, []);
 
   const features = [
-    {
-      title: "Materi Belajar",
-      desc: "Akses materi pembelajaran dari 4 kelompok dengan mudah dan interaktif.",
-      icon: <BookOpen className="w-8 h-8" />,
-      color: "var(--color-neo-primary)",
-      link: "/materi"
-    },
+
     {
       title: "Gallery Kegiatan",
       desc: "Lihat dokumentasi foto dan video dari setiap kegiatan kelompok.",
@@ -43,12 +37,7 @@ export default function Home() {
   ];
 
   const steps = [
-    {
-      title: "Pelajari Materi",
-      desc: "Buka menu Materi dan pelajari slide yang sudah disiapkan oleh masing-masing kelompok.",
-      icon: <BookOpen className="w-6 h-6 text-white" />,
-      color: "var(--color-neo-primary)"
-    },
+
     {
       title: "Join Live Quiz",
       desc: "Masukkan nickname-mu di menu Quiz. Tidak perlu ribet daftar atau bikin akun!",
@@ -142,11 +131,6 @@ export default function Home() {
             <Link href="/quiz">
               <NeoButton variant="primary" size="lg" className="w-full sm:w-auto text-lg">
                 Mulai Quiz Sekarang
-              </NeoButton>
-            </Link>
-            <Link href="/materi">
-              <NeoButton variant="white" size="lg" className="w-full sm:w-auto text-lg">
-                Lihat Materi
               </NeoButton>
             </Link>
           </div>

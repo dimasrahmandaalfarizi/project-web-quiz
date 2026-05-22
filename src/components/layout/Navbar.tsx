@@ -23,7 +23,6 @@ export function Navbar() {
 
   const navLinks = [
     { name: "Beranda", path: "/" },
-    { name: "Materi", path: "/materi" },
     { name: "Gallery", path: "/gallery" },
   ];
 
