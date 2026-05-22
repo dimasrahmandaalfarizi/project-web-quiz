@@ -19,13 +19,67 @@ const galleryData = Array.from({ length: 24 }).map((_, idx) => {
 
 export default function GalleryPage() {
   const [filter, setFilter] = useState<"all" | "1" | "2" | "3" | "4">("all");
+  const [showSplash, setShowSplash] = useState(false);
+  const [splashGroup, setSplashGroup] = useState<string>("");
+
+  const handleFilterChange = (newFilter: "all" | "1" | "2" | "3" | "4") => {
+    if (filter === newFilter) return;
+    
+    if (newFilter !== "all") {
+      setSplashGroup(newFilter);
+      setShowSplash(true);
+      setTimeout(() => {
+        setShowSplash(false);
+        setTimeout(() => setFilter(newFilter), 400); // Wait for exit animation
+      }, 1500);
+    } else {
+      setFilter(newFilter);
+    }
+  };
 
   const filteredGallery = filter === "all" 
     ? galleryData 
     : galleryData.filter(item => item.group === filter);
 
   return (
-    <div className="flex flex-col gap-8 py-8">
+    <>
+      <AnimatePresence>
+        {showSplash && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0, scale: 1.1, filter: "blur(10px)" }}
+            transition={{ duration: 0.4, ease: "easeInOut" }}
+            className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-[var(--color-neo-green)] text-black p-4 overflow-hidden"
+          >
+            <motion.div
+              animate={{ y: [0, -20, 0], rotate: [0, 5, -5, 0] }}
+              transition={{ repeat: Infinity, duration: 2 }}
+              className="mb-8 bg-white p-6 rounded-3xl border-8 border-black shadow-[12px_12px_0px_#000]"
+            >
+              <ImageIcon className="w-24 h-24 text-[var(--color-neo-primary)]" />
+            </motion.div>
+            <motion.h2
+              initial={{ scale: 0.5, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ delay: 0.2, type: "spring", bounce: 0.6 }}
+              className="text-4xl md:text-7xl font-black text-center uppercase tracking-widest bg-white px-8 py-4 border-8 border-black shadow-[8px_8px_0px_#000] rotate-[-3deg]"
+            >
+              Kelompok {splashGroup}
+            </motion.h2>
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.6 }}
+              className="mt-8 text-xl font-bold bg-black text-white px-6 py-2 rounded-full border-2 border-white tracking-widest animate-pulse"
+            >
+              Mempersiapkan...
+            </motion.p>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <div className="flex flex-col gap-8 py-8">
       <div className="flex items-center gap-4 border-b-4 border-black pb-6">
         <div className="bg-[var(--color-neo-secondary)] p-3 rounded-xl border-2 border-black shadow-[2px_2px_0px_#000]">
           <ImageIcon className="w-8 h-8 text-white" />
@@ -39,7 +93,7 @@ export default function GalleryPage() {
       <div className="flex flex-wrap gap-4">
         <NeoButton 
           variant={filter === "all" ? "secondary" : "white"} 
-          onClick={() => setFilter("all")}
+          onClick={() => handleFilterChange("all")}
         >
           Semua Kelompok
         </NeoButton>
@@ -47,7 +101,7 @@ export default function GalleryPage() {
           <NeoButton 
             key={group}
             variant={filter === group ? "secondary" : "white"}
-            onClick={() => setFilter(group)}
+            onClick={() => handleFilterChange(group)}
           >
             Kelompok {group}
           </NeoButton>
@@ -90,6 +144,7 @@ export default function GalleryPage() {
           ))}
         </AnimatePresence>
       </motion.div>
-    </div>
+      </div>
+    </>
   );
 }
