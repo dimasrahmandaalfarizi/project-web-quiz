@@ -35,7 +35,7 @@ export function Navbar() {
     >
       <div className="max-w-7xl mx-auto flex items-center justify-between">
         <Link href="/" className="flex items-center group">
-          <span className="text-3xl font-black tracking-tight group-hover:-translate-y-1 transition-transform">RELIJION</span>
+          <span className="text-3xl font-black tracking-tight group-hover:-translate-y-1 transition-transform">RELIGION</span>
         </Link>
         
         {/* Desktop Menu */}

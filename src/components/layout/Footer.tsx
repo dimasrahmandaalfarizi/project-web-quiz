@@ -13,7 +13,7 @@ export function Footer() {
           {/* Brand Info */}
           <div className="flex flex-col items-start gap-4 lg:col-span-2">
             <div className="bg-[var(--color-neo-accent)] px-4 py-2 border-4 border-black shadow-[4px_4px_0px_#000] rotate-[-2deg]">
-              <span className="text-3xl font-black tracking-tight text-black">RELIJION</span>
+              <span className="text-3xl font-black tracking-tight text-black">RELIGION</span>
             </div>
             <p className="text-lg font-bold text-gray-800 max-w-md mt-4">
               Platform pembelajaran interaktif yang revolusioner. Menggabungkan materi pelajaran dengan keseruan live quiz ala Kahoot untuk generasi muda.
@@ -74,10 +74,10 @@ export function Footer() {
         {/* Bottom Bar */}
         <div className="mt-16 pt-8 border-t-4 border-black flex flex-col md:flex-row items-center justify-between gap-4">
           <div className="text-lg font-bold text-black bg-white px-6 py-2 rounded-xl border-4 border-black shadow-[4px_4px_0px_#1a1a1a]">
-            &copy; {new Date().getFullYear()} Agama Project. All rights reserved.
+            &copy; {new Date().getFullYear()} RELIGION Project. All rights reserved.
           </div>
           <div className="font-bold text-gray-600">
-            Dibuat dengan 🔥 untuk Kelompok Agama
+            Dibuat dengan 🔥 untuk Kelompok RELIGION
           </div>
         </div>
       </div>

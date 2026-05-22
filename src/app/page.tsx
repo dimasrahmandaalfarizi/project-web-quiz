@@ -176,9 +176,9 @@ export default function Home() {
           <p className="text-lg font-medium text-gray-700">Ikuti langkah mudah ini untuk merasakan pengalaman belajar terbaik.</p>
         </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 relative">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 relative max-w-5xl mx-auto">
           {/* Connecting Line */}
-          <div className="hidden lg:block absolute top-12 left-[10%] right-[10%] h-2 bg-black border-y-2 border-dashed border-white -z-10"></div>
+          <div className="hidden md:block absolute top-12 left-[15%] right-[15%] h-2 bg-black border-y-2 border-dashed border-white -z-10"></div>
           
           {steps.map((step, idx) => (
             <motion.div
@@ -217,7 +217,7 @@ export default function Home() {
             <p className="text-lg font-medium text-gray-700">Semua yang kamu butuhkan ada di sini.</p>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
             {features.map((feature, idx) => (
               <motion.div
                 key={idx}
