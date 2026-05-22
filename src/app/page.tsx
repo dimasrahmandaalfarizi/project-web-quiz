@@ -2,11 +2,22 @@
 
 import { NeoButton } from "@/components/ui/NeoButton";
 import { NeoCard } from "@/components/ui/NeoCard";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { BookOpen, Gamepad2, Image as ImageIcon, Users, Zap, CheckCircle2, Trophy } from "lucide-react";
+import { useState, useEffect } from "react";
 
 export default function Home() {
+  const [showSplash, setShowSplash] = useState(true);
+
+  useEffect(() => {
+    // Hide splash screen after 4 seconds
+    const timer = setTimeout(() => { 
+      setShowSplash(false);
+    }, 4000);
+    return () => clearTimeout(timer);
+  }, []);
+
   const features = [
     {
       title: "Materi Belajar",
@@ -59,7 +70,44 @@ export default function Home() {
   ];
 
   return (
-    <div className="flex flex-col gap-24 py-8">
+    <>
+      <AnimatePresence>
+        {showSplash && (
+          <motion.div
+            initial={{ opacity: 1 }}
+            exit={{ opacity: 0, filter: "blur(20px)", scale: 1.05 }}
+            transition={{ duration: 0.8, ease: "easeInOut" }}
+            className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-[var(--color-neo-dark)] text-white p-4 overflow-hidden"
+          >
+            <motion.h1 
+              initial={{ y: 30, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ delay: 0.4, duration: 0.8, type: "spring", bounce: 0.4 }}
+              className="text-3xl md:text-5xl font-black text-center mb-6 uppercase tracking-widest text-gray-200"
+            >
+              Terima Kasih Kepada
+            </motion.h1>
+            <motion.h2
+              initial={{ scale: 0.8, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              transition={{ delay: 0.9, duration: 0.8, type: "spring", bounce: 0.5 }}
+              className="text-5xl md:text-8xl font-black text-center text-[var(--color-neo-primary)] underline decoration-[var(--color-neo-accent)] decoration-8 underline-offset-8 drop-shadow-[6px_6px_0px_#000]"
+            >
+              SMP 35 SURABAYA
+            </motion.h2>
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 2, duration: 0.8, ease: "easeOut" }}
+              className="mt-16 text-gray-400 font-bold tracking-[0.3em] text-sm uppercase"
+            >
+              Memuat Halaman...
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <div className="flex flex-col gap-24 py-8">
       {/* Hero Section */}
       <section className="flex flex-col lg:flex-row items-center gap-12 relative">
         {/* Floating Decorative Elements */}
@@ -242,5 +290,6 @@ export default function Home() {
         </motion.div>
       </section>
     </div>
+    </>
   );
 }
