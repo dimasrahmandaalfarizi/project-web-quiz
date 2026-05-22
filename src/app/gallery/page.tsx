@@ -13,20 +13,36 @@ const galleryData = Array.from({ length: 24 }).map((_, idx) => {
     id: idx + 1, 
     group: group.toString(), 
     type: "photo", 
-    caption: `Dokumentasi Kelompok ${group} - Foto ${num}` 
+    caption: `Dokumentasi Kelompok ${group} - Foto ${num}`,
+    imageSrc: undefined,
+    isFeatured: false
   };
 });
 
+const religionData = Array.from({ length: 7 }).map((_, idx) => {
+  const filename = idx === 6 ? "img 7.jpeg" : `img${idx + 1}.jpeg`;
+  return {
+    id: 100 + idx,
+    group: "RELIGION",
+    type: "photo",
+    caption: `Dokumentasi RELIGION - Foto ${idx + 1}`,
+    imageSrc: `/img/${filename}`,
+    isFeatured: idx === 0
+  };
+});
+
+const allData = [...galleryData, ...religionData];
+
 export default function GalleryPage() {
-  const [filter, setFilter] = useState<"all" | "1" | "2" | "3" | "4">("all");
+  const [filter, setFilter] = useState<"all" | "religion" | "1" | "2" | "3" | "4">("all");
   const [showSplash, setShowSplash] = useState(false);
   const [splashGroup, setSplashGroup] = useState<string>("");
 
-  const handleFilterChange = (newFilter: "all" | "1" | "2" | "3" | "4") => {
+  const handleFilterChange = (newFilter: "all" | "religion" | "1" | "2" | "3" | "4") => {
     if (filter === newFilter) return;
     
     if (newFilter !== "all") {
-      setSplashGroup(newFilter);
+      setSplashGroup(newFilter === "religion" ? "RELIGION" : newFilter);
       setShowSplash(true);
       setTimeout(() => {
         setShowSplash(false);
@@ -38,8 +54,8 @@ export default function GalleryPage() {
   };
 
   const filteredGallery = filter === "all" 
-    ? galleryData 
-    : galleryData.filter(item => item.group === filter);
+    ? allData 
+    : allData.filter(item => item.group.toLowerCase() === filter.toLowerCase());
 
   return (
     <>
@@ -97,6 +113,12 @@ export default function GalleryPage() {
         >
           Semua Kelompok
         </NeoButton>
+        <NeoButton 
+          variant={filter === "religion" ? "secondary" : "white"} 
+          onClick={() => handleFilterChange("religion")}
+        >
+          RELIGION
+        </NeoButton>
         {(["1", "2", "3", "4"] as const).map((group) => (
           <NeoButton 
             key={group}
@@ -113,7 +135,9 @@ export default function GalleryPage() {
         className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-4"
       >
         <AnimatePresence mode="popLayout">
-          {filteredGallery.map((item, index) => (
+          {filteredGallery.map((item, index) => {
+            const isHuge = item.isFeatured && filter === "religion";
+            return (
             <motion.div
               layout
               initial={{ opacity: 0, scale: 0.8, y: 20 }}
@@ -126,22 +150,30 @@ export default function GalleryPage() {
                 delay: (index % 6) * 0.05 
               }}
               key={item.id}
-              className="group relative rounded-xl border-4 border-black overflow-hidden bg-white shadow-[4px_4px_0px_#1a1a1a] hover:shadow-[8px_8px_0px_#1a1a1a] hover:-translate-y-1 transition-all"
+              className={`group relative rounded-xl border-4 border-black overflow-hidden bg-white shadow-[4px_4px_0px_#1a1a1a] hover:shadow-[8px_8px_0px_#1a1a1a] hover:-translate-y-1 transition-all ${isHuge ? "md:col-span-2 lg:col-span-3" : ""}`}
             >
-              <div className="aspect-video relative overflow-hidden bg-gray-100 flex items-center justify-center">
-                <ImageIcon className="w-16 h-16 text-gray-300 group-hover:scale-110 group-hover:text-[var(--color-neo-primary)] transition-all duration-500" />
-                <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                  <span className="font-black text-xl text-gray-400 rotate-[-10deg] opacity-50">FOTO DOKUMENTASI</span>
-                </div>
+              <div className={`relative overflow-hidden bg-gray-100 flex items-center justify-center ${isHuge ? "aspect-video md:aspect-[21/9]" : "aspect-video"}`}>
+                {item.imageSrc ? (
+                  /* eslint-disable-next-line @next/next/no-img-element */
+                  <img src={item.imageSrc} alt={item.caption} className="w-full h-full object-cover group-hover:scale-110 transition-all duration-500" />
+                ) : (
+                  <>
+                    <ImageIcon className="w-16 h-16 text-gray-300 group-hover:scale-110 group-hover:text-[var(--color-neo-primary)] transition-all duration-500" />
+                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                      <span className="font-black text-xl text-gray-400 rotate-[-10deg] opacity-50">FOTO DOKUMENTASI</span>
+                    </div>
+                  </>
+                )}
                 <div className="absolute top-4 right-4 bg-[var(--color-neo-accent)] px-3 py-1 border-2 border-black rounded-lg font-black text-sm shadow-[2px_2px_0px_#000]">
-                  Klmpk {item.group}
+                  {item.group === "RELIGION" ? "RELIGION" : `Klmpk ${item.group}`}
                 </div>
               </div>
               <div className="p-4 border-t-4 border-black bg-white group-hover:bg-[var(--color-neo-bg)] transition-colors">
                 <p className="font-bold text-lg">{item.caption}</p>
               </div>
             </motion.div>
-          ))}
+            );
+          })}
         </AnimatePresence>
       </motion.div>
       </div>
