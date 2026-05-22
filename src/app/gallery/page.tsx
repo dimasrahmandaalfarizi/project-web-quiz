@@ -1,18 +1,21 @@
 "use client";
 
 import { NeoButton } from "@/components/ui/NeoButton";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { useState } from "react";
 import { Image as ImageIcon } from "lucide-react";
 
-const galleryData = [
-  { id: 1, group: "1", type: "photo", url: "https://images.unsplash.com/photo-1523580494112-071dcb92a110?auto=format&fit=crop&q=80&w=800", caption: "Kegiatan Diskusi Kelompok 1" },
-  { id: 2, group: "2", type: "photo", url: "https://images.unsplash.com/photo-1511629091441-ee46146481b6?auto=format&fit=crop&q=80&w=800", caption: "Presentasi Kelompok 2" },
-  { id: 3, group: "3", type: "photo", url: "https://images.unsplash.com/photo-1524178232363-1fb2b075b655?auto=format&fit=crop&q=80&w=800", caption: "Kerja Bakti Kelompok 3" },
-  { id: 4, group: "4", type: "photo", url: "https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&q=80&w=800", caption: "Rapat Kelompok 4" },
-  { id: 5, group: "1", type: "photo", url: "https://images.unsplash.com/photo-1515162816999-a0c47dc192f7?auto=format&fit=crop&q=80&w=800", caption: "Belajar Bersama Kelompok 1" },
-  { id: 6, group: "2", type: "photo", url: "https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&q=80&w=800", caption: "Diskusi Panel Kelompok 2" },
-];
+// Generate 24 photos, 6 for each group
+const galleryData = Array.from({ length: 24 }).map((_, idx) => {
+  const group = Math.floor(idx / 6) + 1;
+  const num = (idx % 6) + 1;
+  return { 
+    id: idx + 1, 
+    group: group.toString(), 
+    type: "photo", 
+    caption: `Dokumentasi Kelompok ${group} - Foto ${num}` 
+  };
+});
 
 export default function GalleryPage() {
   const [filter, setFilter] = useState<"all" | "1" | "2" | "3" | "4">("all");
@@ -53,31 +56,39 @@ export default function GalleryPage() {
 
       <motion.div 
         layout
-        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-4"
       >
-        {filteredGallery.map((item) => (
-          <motion.div
-            layout
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.9 }}
-            key={item.id}
-            className="group relative rounded-xl border-4 border-black overflow-hidden bg-white shadow-[4px_4px_0px_#1a1a1a]"
-          >
-            <div className="aspect-video relative overflow-hidden bg-gray-100 flex items-center justify-center">
-              <ImageIcon className="w-16 h-16 text-gray-300 group-hover:scale-110 transition-transform duration-500" />
-              <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                <span className="font-black text-xl text-gray-400 rotate-[-10deg]">FOTO DOKUMENTASI</span>
+        <AnimatePresence mode="popLayout">
+          {filteredGallery.map((item, index) => (
+            <motion.div
+              layout
+              initial={{ opacity: 0, scale: 0.8, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.8, y: -20 }}
+              transition={{ 
+                duration: 0.4, 
+                type: "spring", 
+                bounce: 0.4,
+                delay: (index % 6) * 0.05 
+              }}
+              key={item.id}
+              className="group relative rounded-xl border-4 border-black overflow-hidden bg-white shadow-[4px_4px_0px_#1a1a1a] hover:shadow-[8px_8px_0px_#1a1a1a] hover:-translate-y-1 transition-all"
+            >
+              <div className="aspect-video relative overflow-hidden bg-gray-100 flex items-center justify-center">
+                <ImageIcon className="w-16 h-16 text-gray-300 group-hover:scale-110 group-hover:text-[var(--color-neo-primary)] transition-all duration-500" />
+                <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                  <span className="font-black text-xl text-gray-400 rotate-[-10deg] opacity-50">FOTO DOKUMENTASI</span>
+                </div>
+                <div className="absolute top-4 right-4 bg-[var(--color-neo-accent)] px-3 py-1 border-2 border-black rounded-lg font-black text-sm shadow-[2px_2px_0px_#000]">
+                  Klmpk {item.group}
+                </div>
               </div>
-              <div className="absolute top-4 right-4 bg-white px-3 py-1 border-2 border-black rounded-lg font-bold text-sm shadow-[2px_2px_0px_#000]">
-                Klmpk {item.group}
+              <div className="p-4 border-t-4 border-black bg-white group-hover:bg-[var(--color-neo-bg)] transition-colors">
+                <p className="font-bold text-lg">{item.caption}</p>
               </div>
-            </div>
-            <div className="p-4 border-t-4 border-black bg-[var(--color-neo-bg)]">
-              <p className="font-bold text-lg">{item.caption}</p>
-            </div>
-          </motion.div>
-        ))}
+            </motion.div>
+          ))}
+        </AnimatePresence>
       </motion.div>
     </div>
   );
