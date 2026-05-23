@@ -21,7 +21,7 @@ export default function Home() {
   const features = [
 
     {
-      title: "Gallery Kegiatan",
+      title: "Galeri Kegiatan",
       desc: "Lihat dokumentasi foto dan video dari setiap kegiatan kelompok.",
       icon: <ImageIcon className="w-8 h-8" />,
       color: "var(--color-neo-secondary)",

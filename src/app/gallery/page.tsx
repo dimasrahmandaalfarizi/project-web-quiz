@@ -101,7 +101,7 @@ export default function GalleryPage() {
           <ImageIcon className="w-8 h-8 text-white" />
         </div>
         <div>
-          <h1 className="text-4xl font-black">Gallery Kegiatan</h1>
+          <h1 className="text-4xl font-black">Galeri Kegiatan</h1>
           <p className="text-gray-700 font-medium">Dokumentasi momen-momen seru dari setiap kelompok.</p>
         </div>
       </div>

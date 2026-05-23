@@ -1,4 +1,7 @@
+"use client";
+
 import Link from "next/link";
+import { QRCodeSVG } from "qrcode.react";
 
 
 export function Footer() {
@@ -8,7 +11,7 @@ export function Footer() {
       <div className="absolute top-0 left-0 w-full h-4 bg-[var(--color-neo-primary)]"></div>
 
       <div className="max-w-7xl mx-auto px-4 md:px-8 py-16">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-12">
           
           {/* Brand Info */}
           <div className="flex flex-col items-start gap-4 lg:col-span-2">
@@ -24,7 +27,7 @@ export function Footer() {
           <div className="flex flex-col gap-4">
             <h3 className="text-2xl font-black mb-2">Navigasi Utama</h3>
             <Link href="/" className="font-bold text-lg hover:text-[var(--color-neo-primary)] hover:translate-x-2 transition-transform w-fit">Beranda</Link>
-            <Link href="/gallery" className="font-bold text-lg hover:text-[var(--color-neo-primary)] hover:translate-x-2 transition-transform w-fit">Gallery Kegiatan</Link>
+            <Link href="/gallery" className="font-bold text-lg hover:text-[var(--color-neo-primary)] hover:translate-x-2 transition-transform w-fit">Galeri Kegiatan</Link>
             <Link href="/quiz" className="font-bold text-lg hover:text-[var(--color-neo-primary)] hover:translate-x-2 transition-transform w-fit">Live Quiz</Link>
           </div>
 
@@ -67,6 +70,20 @@ export function Footer() {
                   <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
                 </svg>
               </a>
+            </div>
+          </div>
+
+          {/* Scan QR */}
+          <div className="flex flex-col gap-4">
+            <h3 className="text-2xl font-black mb-2">Scan & Join!</h3>
+            <div className="bg-white p-3 border-4 border-black rounded-2xl w-fit shadow-[4px_4px_0px_#1a1a1a] rotate-2 hover:rotate-0 transition-transform">
+              <QRCodeSVG 
+                value="https://project-web-quiz.vercel.app" 
+                size={120} 
+                bgColor={"#ffffff"} 
+                fgColor={"#000000"} 
+                level={"H"} 
+              />
             </div>
           </div>
         </div>
