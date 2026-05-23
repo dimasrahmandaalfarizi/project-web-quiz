@@ -5,15 +5,13 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useState } from "react";
 import { Image as ImageIcon } from "lucide-react";
 
-// Generate 24 photos, 6 for each group
-const galleryData = Array.from({ length: 24 }).map((_, idx) => {
-  const group = Math.floor(idx / 6) + 1;
-  const num = (idx % 6) + 1;
+// Generate placeholder photos for KELAS 8D
+const galleryData = Array.from({ length: 12 }).map((_, idx) => {
   return { 
     id: idx + 1, 
-    group: group.toString(), 
+    group: "KELAS 8D", 
     type: "photo", 
-    caption: `Dokumentasi Kelompok ${group} - Foto ${num}`,
+    caption: `Dokumentasi KELAS 8D - Foto ${idx + 1}`,
     imageSrc: undefined,
     isFeatured: false
   };
@@ -34,28 +32,26 @@ const religionData = Array.from({ length: 7 }).map((_, idx) => {
 const allData = [...galleryData, ...religionData];
 
 export default function GalleryPage() {
-  const [filter, setFilter] = useState<"all" | "religion" | "1" | "2" | "3" | "4">("all");
+  const [filter, setFilter] = useState<"religion" | "8d">("religion");
   const [showSplash, setShowSplash] = useState(false);
   const [splashGroup, setSplashGroup] = useState<string>("");
 
-  const handleFilterChange = (newFilter: "all" | "religion" | "1" | "2" | "3" | "4") => {
+  const handleFilterChange = (newFilter: "religion" | "8d") => {
     if (filter === newFilter) return;
     
-    if (newFilter !== "all") {
-      setSplashGroup(newFilter === "religion" ? "RELIGION" : newFilter);
-      setShowSplash(true);
-      setTimeout(() => {
-        setShowSplash(false);
-        setTimeout(() => setFilter(newFilter), 400); // Wait for exit animation
-      }, 1500);
-    } else {
-      setFilter(newFilter);
-    }
+    setSplashGroup(newFilter === "religion" ? "RELIGION" : "KELAS 8D");
+    setShowSplash(true);
+    setTimeout(() => {
+      setShowSplash(false);
+      setTimeout(() => setFilter(newFilter), 400); // Wait for exit animation
+    }, 1500);
   };
 
-  const filteredGallery = filter === "all" 
-    ? allData 
-    : allData.filter(item => item.group.toLowerCase() === filter.toLowerCase());
+  const filteredGallery = allData.filter(item => {
+    if (filter === "religion") return item.group === "RELIGION";
+    if (filter === "8d") return item.group === "KELAS 8D";
+    return false;
+  });
 
   return (
     <>
@@ -81,7 +77,7 @@ export default function GalleryPage() {
               transition={{ delay: 0.2, type: "spring", bounce: 0.6 }}
               className="text-4xl md:text-7xl font-black text-center uppercase tracking-widest bg-white px-8 py-4 border-8 border-black shadow-[8px_8px_0px_#000] rotate-[-3deg]"
             >
-              Kelompok {splashGroup}
+              {splashGroup}
             </motion.h2>
             <motion.p
               initial={{ opacity: 0, y: 20 }}
@@ -108,26 +104,17 @@ export default function GalleryPage() {
 
       <div className="flex flex-wrap gap-4">
         <NeoButton 
-          variant={filter === "all" ? "secondary" : "white"} 
-          onClick={() => handleFilterChange("all")}
-        >
-          SEMUA KELOMPOK
-        </NeoButton>
-        <NeoButton 
           variant={filter === "religion" ? "secondary" : "white"} 
           onClick={() => handleFilterChange("religion")}
         >
           RELIGION
         </NeoButton>
-        {(["1", "2", "3", "4"] as const).map((group) => (
-          <NeoButton 
-            key={group}
-            variant={filter === group ? "secondary" : "white"}
-            onClick={() => handleFilterChange(group)}
-          >
-            KELOMPOK {group}
-          </NeoButton>
-        ))}
+        <NeoButton 
+          variant={filter === "8d" ? "secondary" : "white"} 
+          onClick={() => handleFilterChange("8d")}
+        >
+          KELAS 8D
+        </NeoButton>
       </div>
 
       <motion.div 
@@ -165,7 +152,7 @@ export default function GalleryPage() {
                   </>
                 )}
                 <div className="absolute top-4 right-4 bg-[var(--color-neo-accent)] px-3 py-1 border-2 border-black rounded-lg font-black text-sm shadow-[2px_2px_0px_#000]">
-                  {item.group === "RELIGION" ? "RELIGION" : `Klmpk ${item.group}`}
+                  {item.group}
                 </div>
               </div>
               <div className="p-4 border-t-4 border-black bg-white group-hover:bg-[var(--color-neo-bg)] transition-colors">
