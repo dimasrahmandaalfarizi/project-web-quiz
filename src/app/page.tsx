@@ -114,14 +114,14 @@ export default function Home() {
           className="flex-1 space-y-6 relative z-10"
         >
           <div className="inline-block bg-[var(--color-neo-accent)] text-black font-bold px-3 py-2 md:px-4 md:py-2 text-sm md:text-base rounded-full border-2 border-black shadow-[2px_2px_0px_#000] rotate-[-2deg]">
-            🚀 Platform Belajar Generasi Baru
+            Platform Sosialisasi Generasi Baru
           </div>
           <h1 className="text-5xl md:text-7xl font-black leading-tight tracking-tight">
-            Belajar Agama <br />
+            Sosialisasi <br />
             Jadi Lebih <span className="text-[var(--color-neo-primary)] underline decoration-[var(--color-neo-dark)] decoration-8 underline-offset-8">Seru!</span>
           </h1>
           <p className="text-xl font-medium text-gray-800 max-w-xl">
-            Gabungkan pembelajaran, portfolio kelompok, dan live quiz interaktif dalam satu platform modern yang didesain khusus untuk anak muda.
+            Gabungkan aktivitas sosialisasi, portfolio kelompok, dan live quiz interaktif dalam satu platform modern yang didesain khusus untuk anak muda.
           </p>
           <div className="flex flex-wrap gap-4 pt-4">
             <Link href="/quiz">
@@ -148,16 +148,18 @@ export default function Home() {
             />
             {/* Floating Badges */}
             <motion.div 
+              whileHover={{ scale: 1.1, rotate: 15 }}
               animate={{ y: [0, -10, 0] }}
-              transition={{ repeat: Infinity, duration: 2 }}
-              className="absolute -top-4 -right-4 md:-top-6 md:-right-6 z-20 bg-white p-3 md:p-4 border-4 border-black rounded-xl shadow-[4px_4px_0px_#000] rotate-12"
+              transition={{ y: { repeat: Infinity, duration: 2 } }}
+              className="absolute -top-4 -right-4 md:-top-6 md:-right-6 z-20 bg-white px-3 py-2 md:px-5 md:py-3 border-4 border-black rounded-xl shadow-[4px_4px_0px_#000] rotate-12 cursor-pointer"
             >
-              <span className="text-xl md:text-3xl">✨</span>
+              <span className="text-xl md:text-3xl font-black text-[var(--color-neo-primary)]">WOW!</span>
             </motion.div>
             <motion.div 
+              whileHover={{ scale: 1.1, rotate: -10 }}
               animate={{ y: [0, 10, 0] }}
-              transition={{ repeat: Infinity, duration: 3 }}
-              className="absolute -bottom-4 -left-4 md:-bottom-6 md:-left-6 z-20 bg-[var(--color-neo-accent)] px-4 py-2 md:px-6 md:py-3 border-4 border-black rounded-xl shadow-[4px_4px_0px_#000] -rotate-6"
+              transition={{ y: { repeat: Infinity, duration: 3 } }}
+              className="absolute -bottom-4 -left-4 md:-bottom-6 md:-left-6 z-20 bg-[var(--color-neo-accent)] px-4 py-2 md:px-6 md:py-3 border-4 border-black rounded-xl shadow-[4px_4px_0px_#000] -rotate-6 cursor-pointer"
             >
               <span className="text-sm md:text-xl font-black">100% Fun!</span>
             </motion.div>
@@ -258,8 +260,8 @@ export default function Home() {
             </p>
             <div className="pt-4 flex flex-col sm:flex-row justify-center gap-4">
               <Link href="/quiz">
-                <NeoButton variant="accent" size="lg" className="w-full sm:w-auto text-2xl px-12 py-6">
-                  GAS MAIN! 🚀
+                <NeoButton variant="accent" size="lg" className="w-full sm:w-auto text-2xl px-12 py-6 transition-transform hover:scale-105 active:scale-95">
+                  GAS MAIN!
                 </NeoButton>
               </Link>
             </div>
