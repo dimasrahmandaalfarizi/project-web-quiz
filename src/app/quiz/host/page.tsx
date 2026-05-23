@@ -5,7 +5,7 @@ import { NeoCard } from "@/components/ui/NeoCard";
 import { NeoInput } from "@/components/ui/NeoInput";
 import { motion, AnimatePresence } from "framer-motion";
 import { useState, useEffect } from "react";
-import { Users, Play, SkipForward, Trophy, Plus, Settings, Trash } from "lucide-react";
+import { Users, Play, SkipForward, Trophy, Plus, Settings, Trash, Eye, EyeOff } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 
 type HostState = "LOBBY" | "PLAYING" | "LEADERBOARD" | "FINISHED";
@@ -25,6 +25,7 @@ export default function HostQuizPage() {
   const [newQOptions, setNewQOptions] = useState(["", "", "", ""]);
   const [newQCorrect, setNewQCorrect] = useState(0);
   const [newQTime, setNewQTime] = useState(30);
+  const [showQuestions, setShowQuestions] = useState(false);
 
   useEffect(() => {
     const fetchQuestions = async () => {
@@ -209,11 +210,34 @@ export default function HostQuizPage() {
 
               {/* Right Column: Manage Questions */}
               <div className="flex flex-col gap-4">
-                <h3 className="font-black text-2xl flex items-center gap-2">
-                  <Settings className="w-6 h-6" /> Daftar Soal ({questions.length})
-                </h3>
+                <div className="flex justify-between items-center">
+                  <h3 className="font-black text-2xl flex items-center gap-2">
+                    <Settings className="w-6 h-6" /> Daftar Soal ({questions.length})
+                  </h3>
+                  {showQuestions && (
+                    <NeoButton 
+                      size="sm" 
+                      variant="white" 
+                      onClick={() => setShowQuestions(false)}
+                      className="flex items-center gap-2"
+                    >
+                      <EyeOff className="w-4 h-4" /> Sembunyikan
+                    </NeoButton>
+                  )}
+                </div>
                 
-                <div className="bg-white border-4 border-black p-4 rounded-xl shadow-[4px_4px_0px_#000] flex flex-col gap-4 max-h-[60vh] overflow-y-auto">
+                {!showQuestions ? (
+                  <div className="bg-[var(--color-neo-bg)] border-4 border-black p-8 rounded-xl shadow-[4px_4px_0px_#000] flex flex-col items-center justify-center text-center h-full min-h-[300px]">
+                    <EyeOff className="w-16 h-16 text-gray-400 mb-4" />
+                    <p className="font-bold text-gray-600 mb-6">
+                      Daftar soal disembunyikan agar jawaban tidak terlihat oleh peserta (audience).
+                    </p>
+                    <NeoButton variant="secondary" className="flex items-center gap-2" onClick={() => setShowQuestions(true)}>
+                      <Eye className="w-5 h-5" /> Tampilkan Soal
+                    </NeoButton>
+                  </div>
+                ) : (
+                  <div className="bg-white border-4 border-black p-4 rounded-xl shadow-[4px_4px_0px_#000] flex flex-col gap-4 max-h-[60vh] overflow-y-auto">
                   {questions.map((q, i) => (
                     <div key={q.id || i} className="border-2 border-gray-300 p-4 rounded-lg bg-gray-50 relative pr-10">
                       <button 
@@ -273,6 +297,7 @@ export default function HostQuizPage() {
                     </NeoButton>
                   )}
                 </div>
+                )}
               </div>
             </motion.div>
           )}
