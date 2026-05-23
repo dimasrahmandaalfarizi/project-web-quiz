@@ -138,30 +138,36 @@ export default function Home() {
           transition={{ duration: 0.5, delay: 0.2 }}
           className="flex-1 w-full relative z-10"
         >
-          <div className="relative">
-            <div className="absolute inset-0 bg-[var(--color-neo-green)] translate-x-4 translate-y-4 rounded-3xl border-4 border-black" />
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img 
-              src="/hero.png" 
-              alt="Students Learning" 
-              className="relative z-10 w-full object-cover rounded-3xl border-4 border-black aspect-[4/3]"
-            />
+          <div className="relative group">
+            {/* Background color layer */}
+            <div className="absolute inset-0 bg-[var(--color-neo-green)] translate-x-4 translate-y-4 rounded-[255px_15px_225px_15px/15px_225px_15px_255px] border-4 border-black transition-transform duration-300 group-hover:translate-x-2 group-hover:translate-y-2" />
+            
+            {/* Image layer */}
+            <div className="relative z-10 w-full aspect-[4/3] rounded-[15px_225px_15px_255px/255px_15px_225px_15px] border-4 border-black overflow-hidden bg-white">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img 
+                src="/img/hero.jpeg" 
+                alt="Hand-drawn Students" 
+                className="w-full h-full object-cover"
+              />
+            </div>
+            
             {/* Floating Badges */}
             <motion.div 
               whileHover={{ scale: 1.1, rotate: 15 }}
               animate={{ y: [0, -10, 0] }}
               transition={{ y: { repeat: Infinity, duration: 2 } }}
-              className="absolute -top-4 -right-4 md:-top-6 md:-right-6 z-20 bg-white px-3 py-2 md:px-5 md:py-3 border-4 border-black rounded-xl shadow-[4px_4px_0px_#000] rotate-12 cursor-pointer"
+              className="absolute -top-4 -right-4 md:-top-6 md:-right-6 z-20 bg-white px-3 py-2 md:px-5 md:py-3 border-4 border-black rounded-[255px_15px_225px_15px/15px_225px_15px_255px] shadow-[4px_4px_0px_#000] rotate-12 cursor-pointer"
             >
-              <span className="text-xl md:text-3xl font-black text-[var(--color-neo-primary)]">WOW!</span>
+              <span className="text-xl md:text-3xl font-black text-[var(--color-neo-primary)] font-mono">WOW!</span>
             </motion.div>
             <motion.div 
               whileHover={{ scale: 1.1, rotate: -10 }}
               animate={{ y: [0, 10, 0] }}
               transition={{ y: { repeat: Infinity, duration: 3 } }}
-              className="absolute -bottom-4 -left-4 md:-bottom-6 md:-left-6 z-20 bg-[var(--color-neo-accent)] px-4 py-2 md:px-6 md:py-3 border-4 border-black rounded-xl shadow-[4px_4px_0px_#000] -rotate-6 cursor-pointer"
+              className="absolute -bottom-4 -left-4 md:-bottom-6 md:-left-6 z-20 bg-[var(--color-neo-accent)] px-4 py-2 md:px-6 md:py-3 border-4 border-black rounded-[15px_225px_15px_255px/255px_15px_225px_15px] shadow-[4px_4px_0px_#000] -rotate-6 cursor-pointer"
             >
-              <span className="text-sm md:text-xl font-black">100% Fun!</span>
+              <span className="text-sm md:text-xl font-black font-mono">100% Fun!</span>
             </motion.div>
           </div>
         </motion.div>
