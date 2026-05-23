@@ -4,6 +4,7 @@ import { NeoButton } from "@/components/ui/NeoButton";
 import { motion, AnimatePresence } from "framer-motion";
 import { useState } from "react";
 import { Image as ImageIcon } from "lucide-react";
+import Image from "next/image";
 
 // Generate placeholder photos for KELAS 8D
 const galleryData = Array.from({ length: 12 }).map((_, idx) => {
@@ -35,6 +36,7 @@ export default function GalleryPage() {
   const [filter, setFilter] = useState<"religion" | "8d">("religion");
   const [showSplash, setShowSplash] = useState(false);
   const [splashGroup, setSplashGroup] = useState<string>("");
+  const [visibleCount, setVisibleCount] = useState(6);
 
   const handleFilterChange = (newFilter: "religion" | "8d") => {
     if (filter === newFilter) return;
@@ -43,7 +45,10 @@ export default function GalleryPage() {
     setShowSplash(true);
     setTimeout(() => {
       setShowSplash(false);
-      setTimeout(() => setFilter(newFilter), 400); // Wait for exit animation
+      setTimeout(() => {
+        setFilter(newFilter);
+        setVisibleCount(6); // Reset pagination on filter change
+      }, 400); // Wait for exit animation
     }, 1500);
   };
 
@@ -52,6 +57,9 @@ export default function GalleryPage() {
     if (filter === "8d") return item.group === "KELAS 8D";
     return false;
   });
+
+  const visibleGallery = filteredGallery.slice(0, visibleCount);
+  const hasMore = visibleCount < filteredGallery.length;
 
   return (
     <>
@@ -122,7 +130,7 @@ export default function GalleryPage() {
         className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-4"
       >
         <AnimatePresence mode="popLayout">
-          {filteredGallery.map((item, index) => {
+          {visibleGallery.map((item, index) => {
             const isHuge = item.isFeatured && filter === "religion";
             return (
             <motion.div
@@ -139,10 +147,22 @@ export default function GalleryPage() {
               key={item.id}
               className={`group relative rounded-xl border-4 border-black overflow-hidden bg-white shadow-[4px_4px_0px_#1a1a1a] hover:shadow-[8px_8px_0px_#1a1a1a] hover:-translate-y-1 transition-all ${isHuge ? "md:col-span-2 lg:col-span-3" : ""}`}
             >
-              <div className={`relative overflow-hidden bg-gray-100 flex items-center justify-center ${isHuge ? "aspect-video md:aspect-[21/9]" : "aspect-video"}`}>
+              <div className={`relative overflow-hidden bg-gray-200 animate-pulse flex items-center justify-center ${isHuge ? "aspect-video md:aspect-[21/9]" : "aspect-video"}`}>
                 {item.imageSrc ? (
-                  /* eslint-disable-next-line @next/next/no-img-element */
-                  <img src={item.imageSrc} alt={item.caption} className="w-full h-full object-cover group-hover:scale-110 transition-all duration-500" />
+                  <Image 
+                    src={item.imageSrc} 
+                    alt={item.caption} 
+                    fill
+                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                    className="object-cover group-hover:scale-110 transition-all duration-500" 
+                    onLoad={(e) => {
+                      const parent = e.currentTarget.parentElement;
+                      if (parent) {
+                        parent.classList.remove('animate-pulse', 'bg-gray-200');
+                        parent.classList.add('bg-white');
+                      }
+                    }}
+                  />
                 ) : (
                   <>
                     <ImageIcon className="w-16 h-16 text-gray-300 group-hover:scale-110 group-hover:text-[var(--color-neo-primary)] transition-all duration-500" />
@@ -163,6 +183,18 @@ export default function GalleryPage() {
           })}
         </AnimatePresence>
       </motion.div>
+      
+      {hasMore && (
+        <div className="flex justify-center pt-8">
+          <NeoButton 
+            variant="secondary" 
+            size="lg"
+            onClick={() => setVisibleCount(prev => prev + 6)}
+          >
+            Muat Lebih Banyak
+          </NeoButton>
+        </div>
+      )}
       </div>
     </>
   );
