@@ -6,15 +6,15 @@ import { useState } from "react";
 import { Image as ImageIcon } from "lucide-react";
 import Image from "next/image";
 
-// Generate placeholder photos for KELAS 8D
-const galleryData = Array.from({ length: 12 }).map((_, idx) => {
+// Data foto untuk KELAS 8D (10 foto dari folder public/img/8D)
+const galleryData = Array.from({ length: 10 }).map((_, idx) => {
   return { 
     id: idx + 1, 
     group: "KELAS 8D", 
     type: "photo", 
     caption: `Dokumentasi KELAS 8D - Foto ${idx + 1}`,
-    imageSrc: undefined,
-    isFeatured: false
+    imageSrc: `/img/8D/img${idx + 1}.JPG`,
+    isFeatured: idx === 0
   };
 });
 
