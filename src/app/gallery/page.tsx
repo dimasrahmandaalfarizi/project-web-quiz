@@ -30,18 +30,30 @@ const religionData = Array.from({ length: 7 }).map((_, idx) => {
   };
 });
 
-const allData = [...galleryData, ...religionData];
+// Data foto untuk BEHIND THE SCENES (Placeholder)
+const btsData = Array.from({ length: 6 }).map((_, idx) => {
+  return {
+    id: 200 + idx,
+    group: "BEHIND THE SCENES",
+    type: "photo",
+    caption: `Behind The Scene - Foto ${idx + 1}`,
+    imageSrc: undefined,
+    isFeatured: false
+  };
+});
+
+const allData = [...galleryData, ...religionData, ...btsData];
 
 export default function GalleryPage() {
-  const [filter, setFilter] = useState<"religion" | "8d">("religion");
+  const [filter, setFilter] = useState<"religion" | "8d" | "bts">("religion");
   const [showSplash, setShowSplash] = useState(false);
   const [splashGroup, setSplashGroup] = useState<string>("");
   const [visibleCount, setVisibleCount] = useState(6);
 
-  const handleFilterChange = (newFilter: "religion" | "8d") => {
+  const handleFilterChange = (newFilter: "religion" | "8d" | "bts") => {
     if (filter === newFilter) return;
     
-    setSplashGroup(newFilter === "religion" ? "RELIGION" : "KELAS 8D");
+    setSplashGroup(newFilter === "religion" ? "RELIGION" : (newFilter === "8d" ? "KELAS 8D" : "BEHIND THE SCENE"));
     setShowSplash(true);
     setTimeout(() => {
       setShowSplash(false);
@@ -55,6 +67,7 @@ export default function GalleryPage() {
   const filteredGallery = allData.filter(item => {
     if (filter === "religion") return item.group === "RELIGION";
     if (filter === "8d") return item.group === "KELAS 8D";
+    if (filter === "bts") return item.group === "BEHIND THE SCENES";
     return false;
   });
 
@@ -122,6 +135,12 @@ export default function GalleryPage() {
           onClick={() => handleFilterChange("8d")}
         >
           KELAS 8D
+        </NeoButton>
+        <NeoButton 
+          variant={filter === "bts" ? "secondary" : "white"} 
+          onClick={() => handleFilterChange("bts")}
+        >
+          BEHIND THE SCENE
         </NeoButton>
       </div>
 
