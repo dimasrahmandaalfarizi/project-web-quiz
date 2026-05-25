@@ -6,8 +6,8 @@ import { useState } from "react";
 import { Image as ImageIcon } from "lucide-react";
 import Image from "next/image";
 
-// Data foto untuk KELAS 8D (10 foto dari folder public/img/8D)
-const galleryData = Array.from({ length: 10 }).map((_, idx) => {
+// Data foto untuk KELAS 8D (12 foto dari folder public/img/8D)
+const galleryData = Array.from({ length: 12 }).map((_, idx) => {
   return { 
     id: idx + 1, 
     group: "KELAS 8D", 
@@ -30,15 +30,15 @@ const religionData = Array.from({ length: 7 }).map((_, idx) => {
   };
 });
 
-// Data foto untuk BEHIND THE SCENES (Placeholder)
-const btsData = Array.from({ length: 6 }).map((_, idx) => {
+// Data foto untuk BEHIND THE SCENES (29 foto dari folder public/img/BTS)
+const btsData = Array.from({ length: 29 }).map((_, idx) => {
   return {
     id: 200 + idx,
     group: "BEHIND THE SCENES",
     type: "photo",
     caption: `Behind The Scene - Foto ${idx + 1}`,
-    imageSrc: undefined,
-    isFeatured: false
+    imageSrc: `/img/BTS/bts${idx + 1}.JPG`,
+    isFeatured: idx === 0
   };
 });
 
@@ -146,11 +146,10 @@ export default function GalleryPage() {
 
       <motion.div 
         layout
-        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-4"
+        className="columns-1 md:columns-2 lg:columns-3 gap-6 mt-4"
       >
         <AnimatePresence mode="popLayout">
           {visibleGallery.map((item, index) => {
-            const isHuge = item.isFeatured && filter === "religion";
             return (
             <motion.div
               layout
@@ -164,33 +163,35 @@ export default function GalleryPage() {
                 delay: (index % 6) * 0.05 
               }}
               key={item.id}
-              className={`group relative rounded-xl border-4 border-black overflow-hidden bg-white shadow-[4px_4px_0px_#1a1a1a] hover:shadow-[8px_8px_0px_#1a1a1a] hover:-translate-y-1 transition-all ${isHuge ? "md:col-span-2 lg:col-span-3" : ""}`}
+              className="group relative rounded-xl border-4 border-black overflow-hidden bg-white shadow-[4px_4px_0px_#1a1a1a] hover:shadow-[8px_8px_0px_#1a1a1a] hover:-translate-y-1 transition-all break-inside-avoid inline-block w-full mb-6"
             >
-              <div className={`relative overflow-hidden bg-gray-200 animate-pulse flex items-center justify-center ${isHuge ? "aspect-video md:aspect-[21/9]" : "aspect-video"}`}>
+              <div className="relative bg-gray-200 animate-pulse flex items-center justify-center">
                 {item.imageSrc ? (
-                  <Image 
+                  /* eslint-disable-next-line @next/next/no-img-element */
+                  <img 
                     src={item.imageSrc} 
                     alt={item.caption} 
-                    fill
-                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                    className="object-cover group-hover:scale-110 transition-all duration-500" 
+                    loading="lazy"
+                    className="w-full h-auto object-cover opacity-0 group-hover:scale-105 transition-all duration-500" 
                     onLoad={(e) => {
-                      const parent = e.currentTarget.parentElement;
+                      const img = e.currentTarget;
+                      const parent = img.parentElement;
                       if (parent) {
                         parent.classList.remove('animate-pulse', 'bg-gray-200');
                         parent.classList.add('bg-white');
+                        img.classList.remove('opacity-0');
                       }
                     }}
                   />
                 ) : (
-                  <>
+                  <div className="aspect-video w-full flex items-center justify-center">
                     <ImageIcon className="w-16 h-16 text-gray-300 group-hover:scale-110 group-hover:text-[var(--color-neo-primary)] transition-all duration-500" />
                     <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                       <span className="font-black text-xl text-gray-400 rotate-[-10deg] opacity-50">FOTO DOKUMENTASI</span>
                     </div>
-                  </>
+                  </div>
                 )}
-                <div className="absolute top-4 right-4 bg-[var(--color-neo-accent)] px-3 py-1 border-2 border-black rounded-lg font-black text-sm shadow-[2px_2px_0px_#000]">
+                <div className="absolute top-4 right-4 bg-[var(--color-neo-accent)] px-3 py-1 border-2 border-black rounded-lg font-black text-sm shadow-[2px_2px_0px_#000] z-10">
                   {item.group}
                 </div>
               </div>
